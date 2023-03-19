@@ -38,7 +38,7 @@ First, hit the screen command<br>
 screen
 ```
 On the screen that opens, press the space bar Then run the program.<br>
-Now you can keep the program running in the background with the combined controls A and D. Now if your connection to the server is interrupted, the program will remain running.
+Now you can keep the program running in the background with the combined control A and D. Now if your connection to the server is interrupted, the program will remain running.
 <hr>
 To see active screens 
 <br>Run this command<br>
