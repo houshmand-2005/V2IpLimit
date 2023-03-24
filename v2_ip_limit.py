@@ -9,50 +9,74 @@ import uuid
 import pytz
 import requests
 
-# if you have problem just run this python app with sudo
-WRITE_LOGS_TF = True
-SEND_LOGS_TO_TEL = False
-LIMIT_NUMBER = 2
-EN_DIS_USERS = "en_dis_users.json"
-LOG_FILE_NAME = "ip_email.log"
-CONFIG_FILE = "config.json"  # you must have this file
-TELEGRAM_BOT_URL = "https://api.telegram.org/bot[add_your_bot_token_here]/sendMessage"
-CHAT_ID = 111111111  # get from here --> @RawDataBot
-EXCEPT_EMAIL = ["client@example.com"]  # they dont disable
-
+LOAD_CONFIG_JSON = "v2iplimit_config.json"
+val_container = ["root-xray-1"]
 
 try:
-    import docker
-
-    client = docker.from_env()
+    with open(LOAD_CONFIG_JSON, "r") as CONFIG_FILE:
+        LOAD_CONFIG_JSON = json.loads(CONFIG_FILE.read())
 except Exception:
-    print("run this command: pip install docker")
+    print("cant find v2iplimit_config.json file ")
     exit()
-containers = client.containers.list()
-try:
-    for container in containers:
-        container_id = container.id  # get the first container
-        break
-except Exception:
-    print("input your container id(full id like bellow)")
-    print(
-        "like this one : f33c163ea72f1590eda927024d2d862b6005685822d28e12ab17778f6bcd5d63"
-    )
-    container_id = input("input your container id:")
+WRITE_LOGS_TF = bool(LOAD_CONFIG_JSON["WRITE_LOGS_TF"])
+SEND_LOGS_TO_TEL = bool(LOAD_CONFIG_JSON["SEND_LOGS_TO_TEL"])
+LIMIT_NUMBER = int(LOAD_CONFIG_JSON["LIMIT_NUMBER"])
+EN_DIS_USERS = str(LOAD_CONFIG_JSON["EN_DIS_USERS"])
+LOG_FILE_NAME = str(LOAD_CONFIG_JSON["LOG_FILE_NAME"])
+CONFIG_FILE = str(LOAD_CONFIG_JSON["CONFIG_FILE"])
+TELEGRAM_BOT_URL = str(LOAD_CONFIG_JSON["TELEGRAM_BOT_URL"])
+CHAT_ID = int(LOAD_CONFIG_JSON["CHAT_ID"])
+EXCEPT_EMAIL = LOAD_CONFIG_JSON["EXCEPT_EMAIL"]
+CONTAINER_ID = str(LOAD_CONFIG_JSON["CONTAINER_ID"])
+if CONTAINER_ID == "auto":
+    try:
+        import docker
+
+        client = docker.from_env()
+        containers = client.containers.list()
+    except Exception:
+        print("run this command: pip install docker")
+        exit()
+    try:
+        for container in containers:
+            if str(container.name) not in val_container:
+                print(
+                    "The program could not find the container automatically."
+                    + " Enter the container id manually"
+                )
+                exit()
+            if str(container.name) in val_container:
+                container_id = container.id
+            break
+    except Exception:
+        print("input your container id(full id like bellow)")
+        print(
+            "like this one : f33c163ea72f1590eda927024d2d862b6005685822d28e12ab17778f6bcd5d63"
+        )
+        container_id = input("input your container id:")
+else:
+    container_id = CONTAINER_ID
+print(f"container id : {container_id}")
 input_log_file = f"/var/lib/docker/containers/{container_id}/{container_id}-json.log"
 with open(CONFIG_FILE, "r") as CONFIG_FILE:
     json_CONFIG_FILE = json.loads(CONFIG_FILE.read())
 list_of_clients = json_CONFIG_FILE["inbounds"][0]["settings"]["clients"]
 
 
-def dump_user_json(json_data):
-    with open(EN_DIS_USERS, "w") as file:
-        json.dump(json_data, file, indent=2)
-
-
 def read_user_json():
     with open(EN_DIS_USERS, "r") as CONFIG_FILE:
         return json.loads(CONFIG_FILE.read())
+
+
+def dump_user_json(json_data):
+    try:
+        read_data = read_user_json()
+        read_data.update(json_data)
+        with open(EN_DIS_USERS, mode="w", encoding="utf-8") as feedsjson:
+            json.dump(read_data, feedsjson)
+    except Exception:
+        with open(EN_DIS_USERS, "w") as file:
+            json.dump(json_data, file, indent=2)
 
 
 def save_config(data):
@@ -91,17 +115,20 @@ def enable_user():
                 print(msg_log)
                 write_log(msg_log)
                 send_logs_to_telegram(msg_log)
-                os.remove(EN_DIS_USERS)
                 save_config(json_CONFIG_FILE)
-            index += 1
+        index += 1
+    try:
+        os.remove(EN_DIS_USERS)
+    except Exception:
+        pass
 
 
 def disable_user(user_email_v2):
     """disable users"""
     index = 0
     for client in list_of_clients:
+        number_cn = 0
         if user_email_v2 == client["email"]:
-            number_cn = 0
             try:
                 user_json = read_user_json()
                 number_cn = 0
@@ -109,7 +136,6 @@ def disable_user(user_email_v2):
                     number_cn += 1
             except Exception:
                 pass
-
             data = {
                 number_cn: {
                     "id": json_CONFIG_FILE["inbounds"][0]["settings"]["clients"][index][
@@ -161,6 +187,9 @@ def email_val(email):
     if re.fullmatch(regex, email):
         return True
     return False
+
+
+enable_user()
 
 
 def job():

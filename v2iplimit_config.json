@@ -1,0 +1,12 @@
+{
+  "WRITE_LOGS_TF": "True",
+  "SEND_LOGS_TO_TEL": "False",
+  "LIMIT_NUMBER": 2,
+  "EN_DIS_USERS": "en_dis_users.json",
+  "LOG_FILE_NAME": "ip_email.log",
+  "CONFIG_FILE": "config.json",
+  "TELEGRAM_BOT_URL": "https://api.telegram.org/bot[add_your_bot_token_here]/sendMessage",
+  "CHAT_ID": 111111111,
+  "EXCEPT_EMAIL": ["client@example.com"],
+  "CONTAINER_ID": "auto"
+}
