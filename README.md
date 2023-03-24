@@ -23,7 +23,7 @@ You can change [this file](v2iplimit_config.json) according to your needs:
 ```bash
 {
   "WRITE_LOGS_TF": "True", // ----> write the logs like who disable and how many users are active now and ...
-  "SEND_LOGS_TO_TEL": "False", // ----> write the logs like who disable and how many users are active now and ...
+  "SEND_LOGS_TO_TEL": "False", // ----> send logs to a telegram bot
   "LIMIT_NUMBER": 2, // ----> number of active IPs for users
   "EN_DIS_USERS": "en_dis_users.json",
   "LOG_FILE_NAME": "ip_email.log",
