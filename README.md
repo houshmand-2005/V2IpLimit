@@ -18,6 +18,13 @@ You must install this library:
 pip install docker
 ```
 
+To run this program
+```bash
+git clone https://github.com/houshmand-2005/V2IpLimit.git
+cd V2IpLimit
+python3 v2_ip_limit.py
+```
+
 You can change [this file](v2iplimit_config.json) according to your needs:
 
 ```bash
