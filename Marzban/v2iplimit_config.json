@@ -1,0 +1,16 @@
+{
+    "WRITE_LOGS_TF": "True",
+    "SEND_LOGS_TO_TEL": "False",
+    "LIMIT_NUMBER": 2,
+    "LOG_FILE_NAME": "ip_email.log",
+    "TELEGRAM_BOT_URL": "https://api.telegram.org/bot[add_your_bot_token_here]/sendMessage",
+    "CHAT_ID": 111111111,
+    "EXCEPT_USERS": [
+        "Username"
+    ],
+    "CONTAINER_ID": "auto",
+    "PANEL_USERNAME": "admin",
+    "PANEL_PASSWORD": "admin",
+    "PANEL_DOMAIN": "sub.domain.com:443",
+    "TIME_TO_CHECK": 360
+}
