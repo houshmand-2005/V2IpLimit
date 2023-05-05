@@ -10,8 +10,8 @@
 
 <b>
 
-[Go to Marzban Version](Marzban\README.md) ♦️
-[Go to V2RayGen Version](V2RayGen\README.md)
+[Go to Marzban Version](Marzban/README.md) ♦️
+[Go to V2RayGen Version](V2RayGen/README.md)
 
 <b>
 If this program was useful for you, please give it a star ⭐
