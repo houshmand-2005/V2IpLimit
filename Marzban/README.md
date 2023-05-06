@@ -56,10 +56,11 @@ exit
 
 <b>Now we are ready to run the script</b>
 
-You must install this library:
+You must install these libraries:
 
 ```bash
 pip install docker
+pip install pytz
 ```
 
 To run this program
