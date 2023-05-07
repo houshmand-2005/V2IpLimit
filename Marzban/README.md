@@ -48,10 +48,20 @@ And a part of the file should be removed from the comment mode <br>First find th
         threading.Thread(target=reader).start()
 ```
 
+like this (It should be exactly like the photo and do not apply extra space) :
+
+<img src="https://github.com/houshmand-2005/V2IpLimit/blob/bbac3c3ee860737bf5036b6d83740c725f5fb442/Marzban/1.png" alt="Marzban" width="800">
+
 Then save the file and exit the container
 
 ```bash
 exit
+```
+then you need to stop and start container to apply the changes
+
+```bash
+docker stop id
+docker start id
 ```
 
 <b>Now we are ready to run the script</b>
@@ -76,18 +86,18 @@ You can change [this file](v2iplimit_config.json) according to your needs:
 
 ```bash
 {
-  "WRITE_LOGS_TF": "True", // ----> write the logs like who disable and how many users are active now and ...
-  "SEND_LOGS_TO_TEL": "False", // ----> send logs to a telegram bot
-  "LIMIT_NUMBER": 2, // ----> number of active IPs for users
+  "WRITE_LOGS_TF": "True", // --> write the logs like who disable and how many users are active now and ...
+  "SEND_LOGS_TO_TEL": "False", // --> send logs to a telegram bot
+  "LIMIT_NUMBER": 2, // --> number of active IPs for users
   "LOG_FILE_NAME": "ip_email.log",
-  "TELEGRAM_BOT_URL": "https://api.telegram.org/bot[add_your_bot_token_here]/sendMessage", // ----> get your token from @BotFather
-  "CHAT_ID": 111111111, // get from here ----> @RawDataBot
-  "EXCEPT_USERS": ["Username"], // ----> Accounts in this list will not be deactivated
-  "CONTAINER_ID": "auto" // Enter the ID of the container in which V2RayGen is running or leave it to auto. Be sure to enter the full ID**
-  "PANEL_USERNAME": "admin", // Add your Marzban username here
-  "PANEL_PASSWORD": "admin", // Add your Marzban password here
-  "PANEL_DOMAIN": "sub.domain.com:443", // Add your Marzban domain name with port here
-  "TIME_TO_CHECK": 360 // Check every x seconds (360s = 6minutes)
+  "TELEGRAM_BOT_URL": "https://api.telegram.org/bot[add_your_bot_token_here]/sendMessage", // --> get your token from @BotFather
+  "CHAT_ID": 111111111, // get from here --> @RawDataBot
+  "EXCEPT_USERS": ["Username"], // --> Accounts in this list will not be deactivated
+  "CONTAINER_ID": "auto" // --> Enter the ID of the container in which V2RayGen is running or leave it to auto. Be sure to enter the full ID**
+  "PANEL_USERNAME": "admin", // --> Add your Marzban username here
+  "PANEL_PASSWORD": "admin", // --> Add your Marzban password here
+  "PANEL_DOMAIN": "sub.domain.com:443", // --> Add your Marzban domain name with port here
+  "TIME_TO_CHECK": 360 // --> Check every x seconds (360s = 6minutes)
 }
 ```
 
