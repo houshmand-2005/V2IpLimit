@@ -102,8 +102,8 @@ def get_token():
     url = f"https://{PANEL_DOMAIN}/api/admin/token"
     payload = {
         "grant_type": "",
-        "username": PANEL_USERNAME,
-        "password": PANEL_PASSWORD,
+        "username": f"{PANEL_USERNAME}",
+        "password": f"{PANEL_PASSWORD}",
         "scope": "",
         "client_id": "",
         "client_secret": "",
@@ -123,8 +123,8 @@ def get_token():
 def all_user():
     payload = {
         "grant_type": "",
-        "username": PANEL_USERNAME,
-        "password": PANEL_PASSWORD,
+        "username": f"{PANEL_USERNAME}",
+        "password": f"{PANEL_PASSWORD}",
         "scope": "",
         "client_id": "",
         "client_secret": "",
