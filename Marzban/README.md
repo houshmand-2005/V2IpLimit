@@ -108,7 +108,7 @@ sudo docker inspect --format="{{.Id}}" containername
 ```
 
 <br>
-This program is activated every <b>6 minutes (you can change it)</b>, it sends information, and users who have used more than the specified number of IPs are deactivated, and these users are written in a json file (EN_DIS_USERS) and after 6 minutes, all users are activated. And it is checked again if there is a need to deactivate the user in these 6 minutes, and if so, it will do so.
+This program is activated every <b>6 minutes (you can change it)</b>, it sends information, and users who have used more than the specified number of IPs are deactivated, and after 6 minutes, all users are activated. And it is checked again if there is a need to deactivate the user in these 6 minutes, and if so, it will do so.
 And again after 6 minutes all users are activated and...
 
 <b>As a result, users who use more than the specified IP cannot use their account unless they are equal to or less than the IP limit.</b>
