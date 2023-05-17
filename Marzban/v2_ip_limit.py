@@ -284,7 +284,7 @@ def job():
         full_report += "\n" + active_users
         full_log = ""
         if email in SPECIAL_LIMIT_USERS:
-            LIMIT_NUMBER = SPECIAL_LIMIT[email]
+            LIMIT_NUMBER = int(SPECIAL_LIMIT[email])
         if len(user_ip) > LIMIT_NUMBER:
             if email not in EXCEPT_USERS:
                 disable_user(email)
