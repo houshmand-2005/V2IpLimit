@@ -2,6 +2,7 @@
 
 Limiting the number of active users with IP
 <br>[**Marzban version**](https://github.com/Gozargah/Marzban)
+<br>With the new Marzban update, this method will be easier soon<br>
 
 <b>if you have problem just run this python app with sudo</b>
 
@@ -57,6 +58,7 @@ Then save the file and exit the container
 ```bash
 exit
 ```
+
 then you need to stop and start container to apply the changes
 
 ```bash
@@ -97,7 +99,11 @@ You can change [this file](v2iplimit_config.json) according to your needs:
   "PANEL_USERNAME": "admin", // --> Add your Marzban username here
   "PANEL_PASSWORD": "admin", // --> Add your Marzban password here
   "PANEL_DOMAIN": "sub.domain.com:443", // --> Add your Marzban domain name with port here
-  "TIME_TO_CHECK": 360 // --> Check every x seconds (360s = 6minutes)
+  "TIME_TO_CHECK": 360, // --> Check every x seconds (360s = 6minutes)
+  "SPECIAL_LIMIT": [
+        ["user1", 4],
+        ["user2", 1]
+    ] // --> You can apply any number of IP limit per user like this, user1 can have 4 IPs
 }
 ```
 

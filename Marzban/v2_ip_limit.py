@@ -42,6 +42,7 @@ PANEL_USERNAME = str(LOAD_CONFIG_JSON["PANEL_USERNAME"])
 PANEL_PASSWORD = str(LOAD_CONFIG_JSON["PANEL_PASSWORD"])
 PANEL_DOMAIN = str(LOAD_CONFIG_JSON["PANEL_DOMAIN"])
 TIME_TO_CHECK = int(LOAD_CONFIG_JSON["TIME_TO_CHECK"])
+SPECIAL_LIMIT = LOAD_CONFIG_JSON["SPECIAL_LIMIT"]
 
 if CONTAINER_ID == "auto":
     try:
@@ -73,6 +74,16 @@ else:
     container_id = CONTAINER_ID
 print(f"container id : {container_id}")
 input_log_file = f"/var/lib/docker/containers/{container_id}/{container_id}-json.log"
+
+(SPECIAL_LIMIT_USERS), (SPECIAL_LIMIT_IP) = list(
+    user[0] for user in SPECIAL_LIMIT
+), list(user[1] for user in SPECIAL_LIMIT)
+SPECIAL_LIMIT = {}
+for key in SPECIAL_LIMIT_USERS:
+    for value in SPECIAL_LIMIT_IP:
+        SPECIAL_LIMIT[key] = value
+        SPECIAL_LIMIT_IP.remove(value)
+        break
 
 
 def send_logs_to_telegram(message):
@@ -181,10 +192,12 @@ def enable_user():
         url = f"https://{PANEL_DOMAIN}/api/user/{username}"
         status = {"status": "active"}
         response = requests.put(url, data=json.dumps(status), headers=headers)
-        print(response.status_code)
+        # print(response.status_code)
         index -= 1
-        send_logs_to_telegram(f"enable user : {username}")
-        write_log(f"enable user : {username}")
+        message = f"enable user : {username}"
+        send_logs_to_telegram(message)
+        write_log(message)
+        print(message)
 
 
 def disable_user(user_email_v2):
@@ -200,10 +213,12 @@ def disable_user(user_email_v2):
     url = f"https://{PANEL_DOMAIN}/api/user/{username}"
     status = {"status": "disabled"}
     response = requests.put(url, data=json.dumps(status), headers=headers)
-    print(response.status_code)
+    # print(response.status_code)
     INACTIVE_USERS.append(user_email_v2)
-    send_logs_to_telegram(f"disable user : {username}")
-    write_log(f"disable user : {username}")
+    message = f"disable user : {username}"
+    send_logs_to_telegram(message)
+    write_log(message)
+    print(message)
 
 
 # If there was a problem in deactivating users you can activate all users by :
@@ -268,6 +283,8 @@ def job():
         using_now += len(user_ip)
         full_report += "\n" + active_users
         full_log = ""
+        if email in SPECIAL_LIMIT_USERS:
+            LIMIT_NUMBER = SPECIAL_LIMIT[email]
         if len(user_ip) > LIMIT_NUMBER:
             if email not in EXCEPT_USERS:
                 disable_user(email)
@@ -276,6 +293,7 @@ def job():
                 send_logs_to_telegram(full_log)
                 log_sn = str("\n" + active_users + full_log)
                 write_log(log_sn)
+        LIMIT_NUMBER = int(LOAD_CONFIG_JSON["LIMIT_NUMBER"])
     full_log = f"{full_report}\n{country_time}\nall active users : [ {using_now} ]"
     write_log(full_log)
     send_logs_to_telegram(full_log)
