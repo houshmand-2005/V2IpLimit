@@ -95,7 +95,7 @@ You can change [this file](v2iplimit_config.json) according to your needs:
   "TELEGRAM_BOT_URL": "https://api.telegram.org/bot[add_your_bot_token_here]/sendMessage", // --> get your token from @BotFather
   "CHAT_ID": 111111111, // get from here --> @RawDataBot
   "EXCEPT_USERS": ["Username"], // --> Accounts in this list will not be deactivated
-  "CONTAINER_ID": "auto" // --> Enter the ID of the container in which V2RayGen is running or leave it to auto. Be sure to enter the full ID**
+  "CONTAINER_ID": "auto" // --> Enter the ID of the container in which Marzban is running or leave it to auto. Be sure to enter the full ID**
   "PANEL_USERNAME": "admin", // --> Add your Marzban username here
   "PANEL_PASSWORD": "admin", // --> Add your Marzban password here
   "PANEL_DOMAIN": "sub.domain.com:443", // --> Add your Marzban domain name with port here
