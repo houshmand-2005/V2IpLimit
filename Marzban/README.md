@@ -34,7 +34,10 @@ You can change [this file](v2iplimit_config.json) according to your needs:
   "LOG_FILE_NAME": "ip_email.log",
   "TELEGRAM_BOT_URL": "https://api.telegram.org/bot[add_your_bot_token_here]/sendMessage", // --> get your token from @BotFather
   "CHAT_ID": 111111111, // get from here --> @RawDataBot
-  "EXCEPT_USERS": ["Username"], // --> Accounts in this list will not be deactivated
+  "EXCEPT_USERS": [
+        "Username",
+        "Username2"
+  ], // --> Accounts in this list will not be deactivated
   "PANEL_USERNAME": "admin", // --> Add your Marzban username here
   "PANEL_PASSWORD": "admin", // --> Add your Marzban password here
   "PANEL_DOMAIN": "sub.domain.com:443", // --> Add your Marzban domain name with port here

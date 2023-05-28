@@ -6,7 +6,8 @@
     "TELEGRAM_BOT_URL": "https://api.telegram.org/bot[add_your_bot_token_here]/sendMessage",
     "CHAT_ID": 111111111,
     "EXCEPT_USERS": [
-        "Username"
+        "Username",
+        "Username2"
     ],
     "PANEL_USERNAME": "admin",
     "PANEL_PASSWORD": "admin",
