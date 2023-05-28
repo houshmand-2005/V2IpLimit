@@ -23,8 +23,7 @@ INVALID_EMAIL = [
     "INFO",
     "request",
 ]
-INVALID_IPS = ["1.1.1.1", "8.8.8.8"]
-
+INVALID_IPS = ["1.1.1.1", "8.8.8.8", "0.0.0.0"]
 INACTIVE_USERS = []
 
 try:
@@ -229,7 +228,6 @@ def disable_user(user_email_v2):
 # enable_all_user()
 
 users_list_l = []
-first_time = 1
 
 
 def save_data(data=""):
@@ -242,29 +240,80 @@ def clear_data():
     users_list_l.clear()
 
 
-async def get_logs():
+async def get_logs(id=0):
     """run websocket"""
+    if id != 0:
+        try:
+            try:
+                async with websockets.connect(
+                    f"wss://{PANEL_DOMAIN}/api/node/{id}/logs?token={get_token()}"
+                ) as ws:
+                    print(f"Establishing connection for node number {id}")
+                    while True:
+                        response = await ws.recv()
+                        read_logs(response)
+            except Exception:
+                async with websockets.connect(
+                    f"ws://{PANEL_DOMAIN}/api/node/{id}/logs?token={get_token()}"
+                ) as ws:
+                    print(f"Establishing connection for node number {id}")
+                    while True:
+                        response = await ws.recv()
+                        read_logs(response)
+        except Exception:
+            message = f"Node number {id} doesn't work"
+            send_logs_to_telegram(message)
+            write_log("\n" + message)
+            print(message)
+    else:
+        try:
+            async with websockets.connect(
+                f"wss://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
+            ) as ws:
+                print("Establishing connection main server")
+                while True:
+                    response = await ws.recv()
+                    read_logs(response)
+        except Exception:
+            async with websockets.connect(
+                f"ws://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
+            ) as ws:
+                print("Establishing connection main server")
+                while True:
+                    response = await ws.recv()
+                    read_logs(response)
+
+
+def get_nodes():
+    token = get_token()
+    header_value = "Bearer "
+    headers = {
+        "Accept": "application/json",
+        "Authorization": header_value + token,
+        "Content-Type": "application/json",
+    }
+
+    url = f"https://{PANEL_DOMAIN}/api/nodes"
     try:
-        async with websockets.connect(
-            f"wss://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
-        ) as ws:
-            print("Establishing connection")
-            while True:
-                response = await ws.recv()
-                read_logs(response)
+        response = requests.get(url, headers=headers)
     except Exception:
-        async with websockets.connect(
-            f"ws://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
-        ) as ws:
-            print("Establishing connection")
-            while True:
-                response = await ws.recv()
-                read_logs(response)
+        url = url.replace("https://", "http://")
+        response = requests.get(url, headers=headers)
+    user_inform = json.loads(response.text)
+    index = 0
+    All_nodes = []
+    try:
+        while True:
+            All_nodes.append(user_inform[index]["id"])
+            index += 1
+    except Exception:
+        pass
+    return All_nodes
 
 
-def get_logs_run():
+def get_logs_run(id=0):
     """run websocket func"""
-    asyncio.run(get_logs())
+    asyncio.run(get_logs(id))
 
 
 def read_logs(log=""):
@@ -290,6 +339,7 @@ def read_logs(log=""):
         email_m = re.search(r"email:\s*([A-Za-z0-9._%+-]+)", log)
         if email_m:
             email = email_m.group(1)
+            email = re.search(r"\.(.*)", email).group(1)
             if email in INVALID_EMAIL:
                 dont_check = True
         else:
@@ -335,35 +385,51 @@ def job():
                 write_log(log_sn)
         print("--------------------------------")
         print(email, user_ip, "Number of active IPs -->", len(user_ip))
-    full_log = f"{full_report}\n{country_time}\nall active users : [ {useing_now} ]"
+    full_log = (
+        f"{full_report}\n{country_time}\nall active users(IPs) : [ {useing_now} ]"
+    )
     if useing_now != 0:
         write_log(full_log)
         print(
             f"--------------------------------\n{country_time}"
-            + f"\nall active users : [ {useing_now} ]"
+            + f"\nall active users(IPs) : [ {useing_now} ]"
         )
     useing_now = 0
-    global first_time
-    if first_time == 1:
-        first_time = 0
-    else:
-        clear_data()
+    clear_data()
 
 
 def enable_user_th():
     """run enable user func"""
     while True:
-        time.sleep(TIME_TO_CHECK)
+        time.sleep(int(TIME_TO_CHECK + TIME_TO_CHECK))
         enable_user()
 
 
+try:
+    get_token()
+except Exception:
+    print(
+        "Wrong url or ip address"
+        + "\nplease check your value in v2iplimit_config.json file"
+    )
+    exit()
 Thread(target=get_logs_run).start()
+NODES = get_nodes()
+threads = []
+if NODES:
+    for node in NODES:
+        Thread(target=get_logs_run, args=(int(node),)).start()
+        time.sleep(0.5)
+time.sleep(1)
 Thread(target=enable_user_th).start()
+
 while True:
     try:
         job()
         time.sleep(int(TIME_TO_CHECK + 3))
     except Exception as ex:
+        send_logs_to_telegram(ex)
+        write_log(ex)
         print(ex)
         time.sleep(10)
 

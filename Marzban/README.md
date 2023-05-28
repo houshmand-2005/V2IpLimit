@@ -3,7 +3,7 @@
 Limiting the number of active users with IP
 <br>[**Marzban version**](https://github.com/Gozargah/Marzban)
 <br>
-**This version is still in beta**
+**This version is still under development, so there may be problems**
 
 <b>if you have problem just run this python app with sudo</b>
 
@@ -18,7 +18,7 @@ Then you need to enter your domain or server IP in the v2iplimit config.json fil
 To run this program
 
 ```bash
-git clone https://github.com/houshmand-2005/V2IpLimit.git
+git clone -b dev https://github.com/houshmand-2005/V2IpLimit.git
 cd V2IpLimit
 cd Marzban
 python3 v2_ip_limit.py
@@ -38,7 +38,7 @@ You can change [this file](v2iplimit_config.json) according to your needs:
   "PANEL_USERNAME": "admin", // --> Add your Marzban username here
   "PANEL_PASSWORD": "admin", // --> Add your Marzban password here
   "PANEL_DOMAIN": "sub.domain.com:443", // --> Add your Marzban domain name with port here
-  "TIME_TO_CHECK": 120, // --> Check every x seconds (120s = 2minutes)
+  "TIME_TO_CHECK": 20, // --> Check every x seconds (20s)
   "SPECIAL_LIMIT": [
         ["user1", 4],
         ["user2", 1]
@@ -47,8 +47,8 @@ You can change [this file](v2iplimit_config.json) according to your needs:
 ```
 
 <br>
-This program is activated every <b>2 minutes (you can change it)</b>, it sends information, and users who have used more than the specified number of IPs are deactivated, and after 2 minutes, all users are activated. And it is checked again if there is a need to deactivate the user in these 2 minutes, and if so, it will do so.
-And again after 2 minutes all users are activated and...
+This program is activated every <b>20s (you can change it)</b>, it sends information, and users who have used more than the specified number of IPs are deactivated, and after 20s, all users are activated. And it is checked again if there is a need to deactivate the user in these 20s, and if so, it will do so.
+And again after 20s all users are activated and...
 
 <b>As a result, users who use more than the specified IP cannot use their account unless they are equal to or less than the IP limit.</b>
 
