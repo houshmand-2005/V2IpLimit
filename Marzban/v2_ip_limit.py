@@ -11,7 +11,6 @@ import websockets
 import requests
 
 
-LOAD_CONFIG_JSON = "v2iplimit_config.json"
 VAL_CONTAINER = ["marzban-marzban-1"]
 INVALID_EMAIL = [
     "API]",
@@ -26,46 +25,60 @@ INVALID_EMAIL = [
 INVALID_IPS = ["1.1.1.1", "8.8.8.8", "0.0.0.0"]
 INACTIVE_USERS = []
 
-try:
-    with open(LOAD_CONFIG_JSON, "r") as CONFIG_FILE:
-        LOAD_CONFIG_JSON = json.loads(CONFIG_FILE.read())
-except Exception as ex:
-    print(ex)
-    print("cant find v2iplimit_config.json file ")
-    exit()
 
-WRITE_LOGS_TF = str(LOAD_CONFIG_JSON["WRITE_LOGS_TF"])
-SEND_LOGS_TO_TEL = str(LOAD_CONFIG_JSON["SEND_LOGS_TO_TEL"])
-LIMIT_NUMBER = int(LOAD_CONFIG_JSON["LIMIT_NUMBER"])
-LOG_FILE_NAME = str(LOAD_CONFIG_JSON["LOG_FILE_NAME"])
-TELEGRAM_BOT_URL = str(LOAD_CONFIG_JSON["TELEGRAM_BOT_URL"])
-CHAT_ID = int(LOAD_CONFIG_JSON["CHAT_ID"])
-EXCEPT_USERS = LOAD_CONFIG_JSON["EXCEPT_USERS"]
-PANEL_USERNAME = str(LOAD_CONFIG_JSON["PANEL_USERNAME"])
-PANEL_PASSWORD = str(LOAD_CONFIG_JSON["PANEL_PASSWORD"])
-PANEL_DOMAIN = str(LOAD_CONFIG_JSON["PANEL_DOMAIN"])
-TIME_TO_CHECK = int(LOAD_CONFIG_JSON["TIME_TO_CHECK"])
-SPECIAL_LIMIT = LOAD_CONFIG_JSON["SPECIAL_LIMIT"]
+def read_config():
+    LOAD_CONFIG_JSON = "v2iplimit_config.json"
+    try:
+        with open(LOAD_CONFIG_JSON, "r") as CONFIG_FILE:
+            LOAD_CONFIG_JSON = json.loads(CONFIG_FILE.read())
+    except Exception as ex:
+        print(ex)
+        print("cant find v2iplimit_config.json file ")
+        exit()
+    global WRITE_LOGS_TF, SEND_LOGS_TO_TEL, LIMIT_NUMBER
+    global LOG_FILE_NAME, TELEGRAM_BOT_URL, CHAT_ID, SPECIAL_LIMIT_USERS
+    global EXCEPT_USERS, PANEL_USERNAME, PANEL_PASSWORD
+    global PANEL_DOMAIN, TIME_TO_CHECK, SPECIAL_LIMIT
+    WRITE_LOGS_TF = str(LOAD_CONFIG_JSON["WRITE_LOGS_TF"])
+    SEND_LOGS_TO_TEL = str(LOAD_CONFIG_JSON["SEND_LOGS_TO_TEL"])
+    LIMIT_NUMBER = int(LOAD_CONFIG_JSON["LIMIT_NUMBER"])
+    LOG_FILE_NAME = str(LOAD_CONFIG_JSON["LOG_FILE_NAME"])
+    TELEGRAM_BOT_URL = str(LOAD_CONFIG_JSON["TELEGRAM_BOT_URL"])
+    CHAT_ID = int(LOAD_CONFIG_JSON["CHAT_ID"])
+    EXCEPT_USERS = LOAD_CONFIG_JSON["EXCEPT_USERS"]
+    PANEL_USERNAME = str(LOAD_CONFIG_JSON["PANEL_USERNAME"])
+    PANEL_PASSWORD = str(LOAD_CONFIG_JSON["PANEL_PASSWORD"])
+    PANEL_DOMAIN = str(LOAD_CONFIG_JSON["PANEL_DOMAIN"])
+    TIME_TO_CHECK = int(LOAD_CONFIG_JSON["TIME_TO_CHECK"])
+    SPECIAL_LIMIT = LOAD_CONFIG_JSON["SPECIAL_LIMIT"]
 
-if WRITE_LOGS_TF.lower() == "false":
-    WRITE_LOGS_TF = False
-else:
-    WRITE_LOGS_TF = True
+    if WRITE_LOGS_TF.lower() == "false":
+        WRITE_LOGS_TF = False
+    else:
+        WRITE_LOGS_TF = True
 
-if SEND_LOGS_TO_TEL.lower() == "false":
-    SEND_LOGS_TO_TEL = False
-else:
-    SEND_LOGS_TO_TEL = True
+    if SEND_LOGS_TO_TEL.lower() == "false":
+        SEND_LOGS_TO_TEL = False
+    else:
+        SEND_LOGS_TO_TEL = True
 
-(SPECIAL_LIMIT_USERS), (SPECIAL_LIMIT_IP) = list(
-    user[0] for user in SPECIAL_LIMIT
-), list(user[1] for user in SPECIAL_LIMIT)
-SPECIAL_LIMIT = {}
-for key in SPECIAL_LIMIT_USERS:
-    for value in SPECIAL_LIMIT_IP:
-        SPECIAL_LIMIT[key] = value
-        SPECIAL_LIMIT_IP.remove(value)
-        break
+    (SPECIAL_LIMIT_USERS), (SPECIAL_LIMIT_IP) = list(
+        user[0] for user in SPECIAL_LIMIT
+    ), list(user[1] for user in SPECIAL_LIMIT)
+    SPECIAL_LIMIT = {}
+    for key in SPECIAL_LIMIT_USERS:
+        for value in SPECIAL_LIMIT_IP:
+            SPECIAL_LIMIT[key] = value
+            SPECIAL_LIMIT_IP.remove(value)
+            break
+
+    def get_limit_number():
+        return LIMIT_NUMBER
+
+    return get_limit_number()
+
+
+read_config()
 
 
 def send_logs_to_telegram(message):
@@ -371,7 +384,7 @@ def job():
         useing_now += len(user_ip)
         full_report += "\n" + active_users
         full_log = ""
-        LIMIT_NUMBER = int(LOAD_CONFIG_JSON["LIMIT_NUMBER"])
+        LIMIT_NUMBER = int(read_config())
         if email in SPECIAL_LIMIT_USERS:
             print("special limit -->", SPECIAL_LIMIT, email)
             LIMIT_NUMBER = int(SPECIAL_LIMIT[email])
@@ -403,6 +416,7 @@ def enable_user_th():
     while True:
         time.sleep(int(TIME_TO_CHECK + TIME_TO_CHECK))
         enable_user()
+        read_config()
 
 
 try:
@@ -429,7 +443,7 @@ while True:
         time.sleep(int(TIME_TO_CHECK + 3))
     except Exception as ex:
         send_logs_to_telegram(ex)
-        write_log(ex)
+        write_log("\n" + str(ex))
         print(ex)
         time.sleep(10)
 
