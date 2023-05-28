@@ -7,9 +7,12 @@ Limiting the number of active users with IP
 
 <b>if you have problem just run this python app with sudo</b>
 
-You must install this library:
+You must install these libraries:
 
 ```bash
+sudo apt update
+apt install python3-pip
+pip install websockets
 pip install pytz
 ```
 
