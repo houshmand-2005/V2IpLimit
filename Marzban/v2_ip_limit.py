@@ -448,9 +448,10 @@ def job():
 
 def delete_valid_list():
     """delete the cache of valid ips"""
-    time.sleep(10000)
-    print("delete valid list and recreate it")
-    VALID_IPS.clear()
+    while True:
+        time.sleep(11000)
+        print("delete valid list and recreate it")
+        VALID_IPS.clear()
 
 
 def enable_user_th():
