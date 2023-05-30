@@ -10,8 +10,6 @@ import pytz
 import websockets
 import requests
 
-
-VAL_CONTAINER = ["marzban-marzban-1"]
 INVALID_EMAIL = [
     "API]",
     "Found",
@@ -24,6 +22,7 @@ INVALID_EMAIL = [
 ]
 INVALID_IPS = ["1.1.1.1", "8.8.8.8", "0.0.0.0"]
 INACTIVE_USERS = []
+VALID_IPS = []
 
 
 def read_config():
@@ -263,17 +262,23 @@ async def get_logs(id=0):
                 ) as ws:
                     print(f"Establishing connection for node number {id}")
                     while True:
-                        response = await ws.recv()
-                        read_logs(response)
-            except Exception:
+                        new_log = await ws.recv()
+                        lines = new_log.split("\n")
+                        for line in lines:
+                            read_logs(line)
+            except Exception as ex:
+                print(ex)
                 async with websockets.connect(
                     f"ws://{PANEL_DOMAIN}/api/node/{id}/logs?token={get_token()}"
                 ) as ws:
                     print(f"Establishing connection for node number {id}")
                     while True:
-                        response = await ws.recv()
-                        read_logs(response)
-        except Exception:
+                        new_log = await ws.recv()
+                        lines = new_log.split("\n")
+                        for line in lines:
+                            read_logs(line)
+        except Exception as ex:
+            print(ex)
             message = f"Node number {id} doesn't work"
             send_logs_to_telegram(message)
             write_log("\n" + message)
@@ -287,7 +292,8 @@ async def get_logs(id=0):
                 while True:
                     response = await ws.recv()
                     read_logs(response)
-        except Exception:
+        except Exception as ex:
+            print(ex)
             async with websockets.connect(
                 f"ws://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
             ) as ws:
@@ -305,7 +311,6 @@ def get_nodes():
         "Authorization": header_value + token,
         "Content-Type": "application/json",
     }
-
     url = f"https://{PANEL_DOMAIN}/api/nodes"
     try:
         response = requests.get(url, headers=headers)
@@ -329,6 +334,21 @@ def get_logs_run(id=0):
     asyncio.run(get_logs(id))
 
 
+def check_ip(i_ip_address):
+    """check IP location"""
+    ip_address = str(i_ip_address)
+    params = ["country"]
+    try:
+        resp = requests.get(
+            "http://ip-api.com/json/" + ip_address, params={"fields": ",".join(params)}
+        )
+        info = resp.json()
+        result = info["country"]
+    except Exception:
+        result = "unknownip2"
+    return result
+
+
 def read_logs(log=""):
     """read all logs and extract data from it"""
     acceptance_match = re.search(r"\baccepted\b", log)
@@ -348,16 +368,28 @@ def read_logs(log=""):
                 dont_check = True
         else:
             dont_check = True
-
-        email_m = re.search(r"email:\s*([A-Za-z0-9._%+-]+)", log)
-        if email_m:
-            email = email_m.group(1)
-            email = re.search(r"\.(.*)", email).group(1)
-            if email in INVALID_EMAIL:
+        if dont_check is False:
+            email_m = re.search(r"email:\s*([A-Za-z0-9._%+-]+)", log)
+            if email_m:
+                email = email_m.group(1)
+                email = re.search(r"\.(.*)", email).group(1)
+                if email in INVALID_EMAIL:
+                    dont_check = True
+            else:
                 dont_check = True
-        else:
-            dont_check = True
-
+        if dont_check is False:
+            if ip_address in VALID_IPS:
+                pass
+            else:
+                loc = check_ip(ip_address)
+                if loc != "Iran":
+                    if loc != "unknownip2":
+                        INVALID_IPS.append(ip_address)
+                        dont_check = True
+                    else:
+                        VALID_IPS.append(ip_address)
+                else:
+                    VALID_IPS.append(ip_address)
         if dont_check is False:
             save_data([email, ip_address])
 
@@ -403,12 +435,22 @@ def job():
     )
     if useing_now != 0:
         write_log(full_log)
+        send_logs_to_telegram(full_log)
         print(
             f"--------------------------------\n{country_time}"
             + f"\nall active users(IPs) : [ {useing_now} ]"
         )
+    else:
+        print("There is no active user")
     useing_now = 0
     clear_data()
+
+
+def delete_valid_list():
+    """delete the cache of valid ips"""
+    time.sleep(10000)
+    print("delete valid list and recreate it")
+    VALID_IPS.clear()
 
 
 def enable_user_th():
@@ -428,18 +470,25 @@ except Exception:
     )
     exit()
 Thread(target=get_logs_run).start()
+time.sleep(1)
 NODES = get_nodes()
 threads = []
 if NODES:
     for node in NODES:
         Thread(target=get_logs_run, args=(int(node),)).start()
-        time.sleep(0.5)
-time.sleep(1)
+        time.sleep(2)
+
+time.sleep(10)
+print("in progress ...")
+time.sleep(10)
 Thread(target=enable_user_th).start()
+Thread(target=delete_valid_list).start()
 
 while True:
     try:
+        print("-----run------")
         job()
+        print("-----done-----")
         time.sleep(int(TIME_TO_CHECK + 3))
     except Exception as ex:
         send_logs_to_telegram(ex)

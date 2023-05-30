@@ -44,7 +44,7 @@ You can change [this file](v2iplimit_config.json) according to your needs:
   "PANEL_USERNAME": "admin", // --> Add your Marzban username here
   "PANEL_PASSWORD": "admin", // --> Add your Marzban password here
   "PANEL_DOMAIN": "sub.domain.com:443", // --> Add your Marzban domain name with port here
-  "TIME_TO_CHECK": 20, // --> Check every x seconds (20s)
+  "TIME_TO_CHECK": 240, // --> Check every x seconds (240 = 4minutes)
   "SPECIAL_LIMIT": [
         ["user1", 4],
         ["user2", 1]
@@ -53,8 +53,8 @@ You can change [this file](v2iplimit_config.json) according to your needs:
 ```
 
 <br>
-This program is activated every <b>20s (you can change it)</b>, it sends information, and users who have used more than the specified number of IPs are deactivated, and after 20s, all users are activated. And it is checked again if there is a need to deactivate the user in these 20s, and if so, it will do so.
-And again after 20s all users are activated and...
+This program is activated every <b>4 minutes (you can change it)</b>, it sends information, and users who have used more than the specified number of IPs are deactivated, and after 4 minutes, all users are activated. And it is checked again if there is a need to deactivate the user in these 4 minutes, and if so, it will do so.
+And again after 4 minutes all users are activated and...
 
 <b>As a result, users who use more than the specified IP cannot use their account unless they are equal to or less than the IP limit.</b>
 

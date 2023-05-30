@@ -12,7 +12,7 @@
     "PANEL_USERNAME": "admin",
     "PANEL_PASSWORD": "admin",
     "PANEL_DOMAIN": "sub.domain.com:443",
-    "TIME_TO_CHECK": 20,
+    "TIME_TO_CHECK": 240,
     "SPECIAL_LIMIT": [
         ["user1", 4],
         ["user2", 1]
