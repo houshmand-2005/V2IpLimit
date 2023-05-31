@@ -3,7 +3,6 @@ import json
 import re
 import time
 from datetime import datetime
-import re
 from threading import Thread
 import asyncio
 import pytz

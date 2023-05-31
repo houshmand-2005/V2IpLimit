@@ -3,9 +3,7 @@
 Limiting the number of active users with IP
 <br>[**Marzban version**](https://github.com/Gozargah/Marzban)
 <br>
-**This version is still under development, so there may be problems**
-
-<b>if you have problem just run this python app with sudo</b>
+It also supports Marzban-node<br>
 
 You must install these libraries:
 
@@ -21,7 +19,7 @@ Then you need to enter your domain or server IP in the v2iplimit config.json fil
 To run this program
 
 ```bash
-git clone -b dev https://github.com/houshmand-2005/V2IpLimit.git
+git clone https://github.com/houshmand-2005/V2IpLimit.git
 cd V2IpLimit
 cd Marzban
 python3 v2_ip_limit.py
@@ -57,6 +55,8 @@ This program is activated every <b>4 minutes (you can change it)</b>, it sends i
 And again after 4 minutes all users are activated and...
 
 <b>As a result, users who use more than the specified IP cannot use their account unless they are equal to or less than the IP limit.</b>
+<br>
+If the websocket connection was interrupted, you need to run the program again (for now)
 
 ## Important note
 
