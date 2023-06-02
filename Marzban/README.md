@@ -55,8 +55,6 @@ This program is activated every <b>4 minutes (you can change it)</b>, it sends i
 And again after 4 minutes all users are activated and...
 
 <b>As a result, users who use more than the specified IP cannot use their account unless they are equal to or less than the IP limit.</b>
-<br>
-If the websocket connection was interrupted, you need to run the program again (for now)
 
 ## Important note
 

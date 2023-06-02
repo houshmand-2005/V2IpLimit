@@ -25,6 +25,7 @@ VALID_IPS = []
 
 
 def read_config():
+    """read the v2iplimit_config.json file"""
     LOAD_CONFIG_JSON = "v2iplimit_config.json"
     try:
         with open(LOAD_CONFIG_JSON, "r") as CONFIG_FILE:
@@ -71,6 +72,7 @@ def read_config():
             break
 
     def get_limit_number():
+        """get limit number from json file"""
         return LIMIT_NUMBER
 
     return get_limit_number()
@@ -82,17 +84,24 @@ read_config()
 def send_logs_to_telegram(message):
     """send logs to telegram"""
     if SEND_LOGS_TO_TEL:
-        send_data = {
-            "chat_id": CHAT_ID,
-            "text": message,
-        }
-        try:
-            response = requests.post(TELEGRAM_BOT_URL, data=send_data)
-        except Exception:
-            time.sleep(15)
-            response = requests.post(TELEGRAM_BOT_URL, data=send_data)
-            if response.status_code != 200:
-                print("Failed to send Telegram message")
+        messages = message.split("]")
+        shorter_messages = [
+            "]".join(messages[i : i + 100]) for i in range(0, len(messages), 100)
+        ]
+        for message in shorter_messages:
+            txt_s = str(message.strip())
+            send_data = {
+                "chat_id": CHAT_ID,
+                "text": txt_s,
+            }
+            try:
+                response = requests.post(TELEGRAM_BOT_URL, data=send_data)
+            except Exception as ex:
+                print(ex)
+                time.sleep(15)
+                response = requests.post(TELEGRAM_BOT_URL, data=send_data)
+                if response.status_code != 200:
+                    print("Failed to send Telegram message")
 
 
 def write_log(log_info):
@@ -254,55 +263,67 @@ def clear_data():
 async def get_logs(id=0):
     """run websocket"""
     if id != 0:
-        try:
+        while True:
             try:
-                async with websockets.connect(
-                    f"wss://{PANEL_DOMAIN}/api/node/{id}/logs?token={get_token()}"
-                ) as ws:
-                    print(f"Establishing connection for node number {id}")
-                    while True:
-                        new_log = await ws.recv()
-                        lines = new_log.split("\n")
-                        for line in lines:
-                            read_logs(line)
+                try:
+                    async with websockets.connect(
+                        f"wss://{PANEL_DOMAIN}/api/node/{id}/logs?token={get_token()}"
+                    ) as ws:
+                        print(f"Establishing connection for node number {id}")
+                        while True:
+                            new_log = await ws.recv()
+                            lines = new_log.split("\n")
+                            for line in lines:
+                                read_logs(line)
+                except Exception as ex:
+                    print(ex)
+                    async with websockets.connect(
+                        f"ws://{PANEL_DOMAIN}/api/node/{id}/logs?token={get_token()}"
+                    ) as ws:
+                        print(f"Establishing connection for node number {id}")
+                        while True:
+                            new_log = await ws.recv()
+                            lines = new_log.split("\n")
+                            for line in lines:
+                                read_logs(line)
             except Exception as ex:
                 print(ex)
-                async with websockets.connect(
-                    f"ws://{PANEL_DOMAIN}/api/node/{id}/logs?token={get_token()}"
-                ) as ws:
-                    print(f"Establishing connection for node number {id}")
-                    while True:
-                        new_log = await ws.recv()
-                        lines = new_log.split("\n")
-                        for line in lines:
-                            read_logs(line)
-        except Exception as ex:
-            print(ex)
-            message = f"Node number {id} doesn't work"
-            send_logs_to_telegram(message)
-            write_log("\n" + message)
-            print(message)
+                message = f"Node number {id} doesn't work"
+                send_logs_to_telegram(message)
+                write_log("\n" + message)
+                print(message)
+                await asyncio.sleep(11)
     else:
-        try:
-            async with websockets.connect(
-                f"wss://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
-            ) as ws:
-                print("Establishing connection main server")
-                while True:
-                    response = await ws.recv()
-                    read_logs(response)
-        except Exception as ex:
-            print(ex)
-            async with websockets.connect(
-                f"ws://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
-            ) as ws:
-                print("Establishing connection main server")
-                while True:
-                    response = await ws.recv()
-                    read_logs(response)
+        while True:
+            try:
+                try:
+                    async with websockets.connect(
+                        f"wss://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
+                    ) as ws:
+                        print("Establishing connection main server")
+                        while True:
+                            response = await ws.recv()
+                            read_logs(response)
+                except Exception as ex:
+                    print(ex)
+                    async with websockets.connect(
+                        f"ws://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
+                    ) as ws:
+                        print("Establishing connection main server")
+                        while True:
+                            response = await ws.recv()
+                            read_logs(response)
+            except Exception as ex:
+                print(ex)
+                message = "main server doesn't work"
+                send_logs_to_telegram(message)
+                write_log("\n" + message)
+                print(message)
+                await asyncio.sleep(10)
 
 
 def get_nodes():
+    """get id of nodes"""
     token = get_token()
     header_value = "Bearer "
     headers = {
@@ -404,7 +425,7 @@ def job():
                 emails_to_ips[email].append(ip)
         else:
             emails_to_ips[email] = [ip]
-    useing_now = 0
+    using_now = 0
     country_time_zone = pytz.timezone("iran")  # or another country
     country_time = datetime.now(country_time_zone)
     country_time = country_time.strftime("%d-%m-%y | %H:%M:%S")
@@ -412,7 +433,7 @@ def job():
     active_users = ""
     for email, user_ip in emails_to_ips.items():
         active_users = str(email) + " " + str(user_ip)
-        useing_now += len(user_ip)
+        using_now += len(user_ip)
         full_report += "\n" + active_users
         full_log = ""
         LIMIT_NUMBER = int(read_config())
@@ -429,19 +450,17 @@ def job():
                 write_log(log_sn)
         print("--------------------------------")
         print(email, user_ip, "Number of active IPs -->", len(user_ip))
-    full_log = (
-        f"{full_report}\n{country_time}\nall active users(IPs) : [ {useing_now} ]"
-    )
-    if useing_now != 0:
+    full_log = f"{full_report}\n{country_time}\nall active users(IPs) : [ {using_now} ]"
+    if using_now != 0:
         write_log(full_log)
         send_logs_to_telegram(full_log)
         print(
             f"--------------------------------\n{country_time}"
-            + f"\nall active users(IPs) : [ {useing_now} ]"
+            + f"\nall active users(IPs) : [ {using_now} ]"
         )
     else:
         print("There is no active user")
-    useing_now = 0
+    using_now = 0
     clear_data()
 
 
