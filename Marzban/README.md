@@ -82,4 +82,10 @@ screen -ls
 screen -r {id}
 ```
 
+<hr>
+
+Video tutorial:<br>
+
+https://github.com/houshmand-2005/V2IpLimit/assets/77535700/7881347e-8b14-4569-a3b0-bc7e5703be39
+
 If this program was useful for you, please give it a star ⭐
