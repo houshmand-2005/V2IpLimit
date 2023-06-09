@@ -5,6 +5,18 @@ Limiting the number of active users with IP
 <br>
 It also supports Marzban-node<br>
 
+At first you need add this to your xray config file :
+
+```bash
+"log": {
+    "loglevel": "info"
+},
+```
+
+![loglevel](https://github.com/houshmand-2005/V2IpLimit/assets/77535700/e4b72d49-e523-4f7b-b22c-dd2f1c4403a3)
+**then save it**
+
+<hr>
 You must install these libraries:
 
 ```bash
@@ -33,7 +45,7 @@ You can change [this file](v2iplimit_config.json) according to your needs:
   "SEND_LOGS_TO_TEL": "False", // --> send logs to a telegram bot
   "LIMIT_NUMBER": 2, // --> number of active IPs for all users
   "LOG_FILE_NAME": "ip_email.log",
-  "TELEGRAM_BOT_URL": "https://api.telegram.org/bot[add_your_bot_token_here]/sendMessage", // --> get your token from @BotFather
+  "TELEGRAM_BOT_URL": "https://api.telegram.org/bot[add_your_bot_token_here]/sendMessage", // --> get your token from @BotFather and delete the '[' and ']'
   "CHAT_ID": 111111111, // get from here --> @RawDataBot
   "EXCEPT_USERS": [
         "Username",
