@@ -16,5 +16,6 @@
     "SPECIAL_LIMIT": [
         ["user1", 4],
         ["user2", 1]
-    ]
+    ],
+    "SERVER_NAME": ""
 }

@@ -58,7 +58,8 @@ You can change [this file](v2iplimit_config.json) according to your needs:
   "SPECIAL_LIMIT": [
         ["user1", 4],
         ["user2", 1]
-    ] // --> You can apply any number of IP limit per user like this, user1 can have 4 IPs
+    ], // --> You can apply any number of IP limit per user like this, user1 can have 4 IPs
+  "SERVER_NAME": "" // --> Optional, You can give your script a name that will appear in your logs.
 }
 ```
 

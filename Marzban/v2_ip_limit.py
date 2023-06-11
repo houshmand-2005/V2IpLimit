@@ -37,7 +37,7 @@ def read_config():
     global WRITE_LOGS_TF, SEND_LOGS_TO_TEL, LIMIT_NUMBER
     global LOG_FILE_NAME, TELEGRAM_BOT_URL, CHAT_ID, SPECIAL_LIMIT_USERS
     global EXCEPT_USERS, PANEL_USERNAME, PANEL_PASSWORD
-    global PANEL_DOMAIN, TIME_TO_CHECK, SPECIAL_LIMIT
+    global PANEL_DOMAIN, TIME_TO_CHECK, SPECIAL_LIMIT, SERVER_NAME
     WRITE_LOGS_TF = str(LOAD_CONFIG_JSON["WRITE_LOGS_TF"])
     SEND_LOGS_TO_TEL = str(LOAD_CONFIG_JSON["SEND_LOGS_TO_TEL"])
     LIMIT_NUMBER = int(LOAD_CONFIG_JSON["LIMIT_NUMBER"])
@@ -50,7 +50,10 @@ def read_config():
     PANEL_DOMAIN = str(LOAD_CONFIG_JSON["PANEL_DOMAIN"])
     TIME_TO_CHECK = int(LOAD_CONFIG_JSON["TIME_TO_CHECK"])
     SPECIAL_LIMIT = LOAD_CONFIG_JSON["SPECIAL_LIMIT"]
-
+    try:
+        SERVER_NAME = str(LOAD_CONFIG_JSON["SERVER_NAME"])
+    except KeyError:
+        SERVER_NAME = False
     if WRITE_LOGS_TF.lower() == "false":
         WRITE_LOGS_TF = False
     else:
@@ -84,6 +87,8 @@ read_config()
 def send_logs_to_telegram(message):
     """send logs to telegram"""
     if SEND_LOGS_TO_TEL:
+        if SERVER_NAME:
+            message = str("<b>" + SERVER_NAME + "</b>\n-------" + message)
         messages = message.split("]")
         shorter_messages = [
             "]".join(messages[i : i + 100]) for i in range(0, len(messages), 100)
@@ -93,6 +98,7 @@ def send_logs_to_telegram(message):
             send_data = {
                 "chat_id": CHAT_ID,
                 "text": txt_s,
+                "parse_mode": "HTML",
             }
             try:
                 response = requests.post(TELEGRAM_BOT_URL, data=send_data)
@@ -114,15 +120,7 @@ def write_log(log_info):
 def get_token():
     """get tokens for other apis"""
     url = f"https://{PANEL_DOMAIN}/api/admin/token"
-    payload = {
-        "grant_type": "",
-        "username": f"{PANEL_USERNAME}",
-        "password": f"{PANEL_PASSWORD}",
-        "scope": "",
-        "client_id": "",
-        "client_secret": "",
-    }
-
+    payload = {"username": f"{PANEL_USERNAME}", "password": f"{PANEL_PASSWORD}"}
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Accept": "application/json",
@@ -139,14 +137,7 @@ def get_token():
 
 def all_user():
     """get the list of all users"""
-    payload = {
-        "grant_type": "",
-        "username": f"{PANEL_USERNAME}",
-        "password": f"{PANEL_PASSWORD}",
-        "scope": "",
-        "client_id": "",
-        "client_secret": "",
-    }
+    payload = {"username": f"{PANEL_USERNAME}", "password": f"{PANEL_PASSWORD}"}
     token = get_token()
     header_value = "Bearer "
     headers = {
@@ -154,7 +145,6 @@ def all_user():
         "Authorization": header_value + token,
         "Content-Type": "application/json",
     }
-
     url = f"https://{PANEL_DOMAIN}/api/users/"
     try:
         response = requests.get(url, data=payload, headers=headers)
@@ -292,7 +282,7 @@ async def get_logs(id=0):
                 send_logs_to_telegram(message)
                 write_log("\n" + message)
                 print(message)
-                await asyncio.sleep(11)
+                await asyncio.sleep(20)
     else:
         while True:
             try:
@@ -319,7 +309,7 @@ async def get_logs(id=0):
                 send_logs_to_telegram(message)
                 write_log("\n" + message)
                 print(message)
-                await asyncio.sleep(10)
+                await asyncio.sleep(25)
 
 
 def get_nodes():
