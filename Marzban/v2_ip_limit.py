@@ -265,8 +265,7 @@ async def get_logs(id=0):
                             lines = new_log.split("\n")
                             for line in lines:
                                 read_logs(line)
-                except Exception as ex:
-                    print(ex)
+                except Exception:
                     async with websockets.connect(
                         f"ws://{PANEL_DOMAIN}/api/node/{id}/logs?token={get_token()}"
                     ) as ws:
@@ -294,8 +293,7 @@ async def get_logs(id=0):
                         while True:
                             response = await ws.recv()
                             read_logs(response)
-                except Exception as ex:
-                    print(ex)
+                except Exception:
                     async with websockets.connect(
                         f"ws://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
                     ) as ws:
@@ -420,12 +418,19 @@ def job():
     country_time = datetime.now(country_time_zone)
     country_time = country_time.strftime("%d-%m-%y | %H:%M:%S")
     full_report = ""
+    full_report_t = ""
     active_users = ""
+    active_users_t = ""
     for email, user_ip in emails_to_ips.items():
-        active_users = str(email) + " " + str(user_ip)
+        active_users = str(email) + " [ " + str(len(user_ip)) + " IPs ]" + str(user_ip)
+        active_users_t = (
+            str(email) + " <b>[ " + str(len(user_ip)) + " ] IPs </b> " + str(user_ip)
+        )
         using_now += len(user_ip)
         full_report += "\n" + active_users
+        full_report_t += "\n" + active_users_t
         full_log = ""
+        full_log_t = ""
         LIMIT_NUMBER = int(read_config())
         if email in SPECIAL_LIMIT_USERS:
             print("special limit -->", SPECIAL_LIMIT, email)
@@ -434,16 +439,17 @@ def job():
             if email not in EXCEPT_USERS:
                 disable_user(email)
                 print("too much ip [", email, "]", " --> ", user_ip)
-                full_log = f"\n{country_time}\nWarning: user {email} is associated with multiple IPs: {user_ip}"
+                full_log = f"\n{country_time}\nWarning: user {email} is associated with {len(user_ip)} IPs: {user_ip}"
                 send_logs_to_telegram(full_log)
                 log_sn = str("\n" + active_users + full_log)
                 write_log(log_sn)
         print("--------------------------------")
         print(email, user_ip, "Number of active IPs -->", len(user_ip))
     full_log = f"{full_report}\n{country_time}\nall active users(IPs) : [ {using_now} ]"
+    full_log_t = f"{full_report_t}\n-------\n{country_time}\n<b>all active users(IPs) : [ {using_now} ]</b>"
     if using_now != 0:
         write_log(full_log)
-        send_logs_to_telegram(full_log)
+        send_logs_to_telegram(full_log_t)
         print(
             f"--------------------------------\n{country_time}"
             + f"\nall active users(IPs) : [ {using_now} ]"
