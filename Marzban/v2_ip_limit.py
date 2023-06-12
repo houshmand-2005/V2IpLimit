@@ -36,7 +36,7 @@ def read_config():
         exit()
     global WRITE_LOGS_TF, SEND_LOGS_TO_TEL, LIMIT_NUMBER
     global LOG_FILE_NAME, TELEGRAM_BOT_URL, CHAT_ID, SPECIAL_LIMIT_USERS
-    global EXCEPT_USERS, PANEL_USERNAME, PANEL_PASSWORD
+    global EXCEPT_USERS, PANEL_USERNAME, PANEL_PASSWORD, PRETTY_PRINT
     global PANEL_DOMAIN, TIME_TO_CHECK, SPECIAL_LIMIT, SERVER_NAME
     WRITE_LOGS_TF = str(LOAD_CONFIG_JSON["WRITE_LOGS_TF"])
     SEND_LOGS_TO_TEL = str(LOAD_CONFIG_JSON["SEND_LOGS_TO_TEL"])
@@ -54,16 +54,13 @@ def read_config():
         SERVER_NAME = str(LOAD_CONFIG_JSON["SERVER_NAME"])
     except KeyError:
         SERVER_NAME = False
-    if WRITE_LOGS_TF.lower() == "false":
-        WRITE_LOGS_TF = False
-    else:
-        WRITE_LOGS_TF = True
-
-    if SEND_LOGS_TO_TEL.lower() == "false":
-        SEND_LOGS_TO_TEL = False
-    else:
-        SEND_LOGS_TO_TEL = True
-
+    try:
+        PRETTY_PRINT = str(LOAD_CONFIG_JSON["PRETTY_PRINT"])
+        PRETTY_PRINT = PRETTY_PRINT.lower() == "true"
+    except KeyError:
+        PRETTY_PRINT = False
+    WRITE_LOGS_TF = WRITE_LOGS_TF.lower() == "true"
+    SEND_LOGS_TO_TEL = SEND_LOGS_TO_TEL.lower() == "true"
     (SPECIAL_LIMIT_USERS), (SPECIAL_LIMIT_IP) = list(
         user[0] for user in SPECIAL_LIMIT
     ), list(user[1] for user in SPECIAL_LIMIT)
@@ -87,14 +84,20 @@ read_config()
 def send_logs_to_telegram(message):
     """send logs to telegram"""
     if SEND_LOGS_TO_TEL:
-        if SERVER_NAME:
-            message = str("<b>" + SERVER_NAME + "</b>\n-------" + message)
-        messages = message.split("]")
-        shorter_messages = [
-            "]".join(messages[i : i + 100]) for i in range(0, len(messages), 100)
-        ]
+        if PRETTY_PRINT:
+            messages = message.split("\n")
+            shorter_messages = [
+                "\n".join(messages[i : i + 95]) for i in range(0, len(messages), 95)
+            ]
+        else:
+            messages = message.split(",")
+            shorter_messages = [
+                ",".join(messages[i : i + 95]) for i in range(0, len(messages), 95)
+            ]
         for message in shorter_messages:
             txt_s = str(message.strip())
+            if SERVER_NAME:
+                txt_s = str("<b>" + SERVER_NAME + "</b>\n-------\n" + str(txt_s))
             send_data = {
                 "chat_id": CHAT_ID,
                 "text": txt_s,
@@ -115,6 +118,21 @@ def write_log(log_info):
     if WRITE_LOGS_TF:
         with open(LOG_FILE_NAME, "a") as f:
             f.write(str(log_info))
+
+
+def telegram_log_parser(users_list):
+    """make the telegram logs ready"""
+    active_users_t = ""
+    if users_list:
+        sorted_data = sorted(users_list, key=lambda x: x[1], reverse=True)
+        for email, user_ip_l, user_ip in sorted_data:
+            if PRETTY_PRINT:
+                user_ip = ["- " + ip for ip in user_ip]
+                user_ip = "\n".join([""] + list(user_ip))
+            active_users_t += (
+                f"\n {str(email)} <b>[ {str(user_ip_l)} ] IPs : </b> {str(user_ip)} "
+            )
+        return active_users_t
 
 
 def get_token():
@@ -420,20 +438,16 @@ def job():
     full_report = ""
     full_report_t = ""
     active_users = ""
-    active_users_t = ""
+    active_users_tl = []
     for email, user_ip in emails_to_ips.items():
         active_users = str(email) + " [ " + str(len(user_ip)) + " IPs ]" + str(user_ip)
-        active_users_t = (
-            str(email) + " <b>[ " + str(len(user_ip)) + " ] IPs </b> " + str(user_ip)
-        )
+        active_users_tl.append([email, len(user_ip), user_ip])
         using_now += len(user_ip)
         full_report += "\n" + active_users
-        full_report_t += "\n" + active_users_t
         full_log = ""
         full_log_t = ""
         LIMIT_NUMBER = int(read_config())
         if email in SPECIAL_LIMIT_USERS:
-            print("special limit -->", SPECIAL_LIMIT, email)
             LIMIT_NUMBER = int(SPECIAL_LIMIT[email])
         if len(user_ip) > LIMIT_NUMBER:
             if email not in EXCEPT_USERS:
@@ -446,6 +460,7 @@ def job():
         print("--------------------------------")
         print(email, user_ip, "Number of active IPs -->", len(user_ip))
     full_log = f"{full_report}\n{country_time}\nall active users(IPs) : [ {using_now} ]"
+    full_report_t = telegram_log_parser(active_users_tl)
     full_log_t = f"{full_report_t}\n-------\n{country_time}\n<b>all active users(IPs) : [ {using_now} ]</b>"
     if using_now != 0:
         write_log(full_log)
