@@ -3,6 +3,7 @@ import json
 import re
 import time
 from datetime import datetime
+import datetime as dt
 from threading import Thread
 import asyncio
 import pytz
@@ -22,6 +23,8 @@ INVALID_EMAIL = [
 INVALID_IPS = ["1.1.1.1", "8.8.8.8", "0.0.0.0"]
 INACTIVE_USERS = []
 VALID_IPS = []
+IP_LOCATION = "Iran"
+DATE_TIME_ZONE = "Iran"
 
 
 def read_config():
@@ -256,6 +259,12 @@ def disable_user(user_email_v2):
 # enable_all_user()
 
 users_list_l = []
+last_usage_d = {}
+
+
+def last_usage(user, last_time):
+    """latest active time per user"""
+    last_usage_d[str(user)] = str(last_time)
 
 
 def save_data(data=""):
@@ -408,7 +417,7 @@ def read_logs(log=""):
                 pass
             else:
                 loc = check_ip(ip_address)
-                if loc != "Iran":
+                if loc != IP_LOCATION:
                     if loc != "unknownip2":
                         INVALID_IPS.append(ip_address)
                         dont_check = True
@@ -417,7 +426,18 @@ def read_logs(log=""):
                 else:
                     VALID_IPS.append(ip_address)
         if dont_check is False:
+            use_time = log.split(" ")
+            time_l = use_time[1]
+            time_object = datetime.strptime(time_l, "%H:%M:%S").time()
+            utc_timezone = pytz.timezone("UTC")
+            utc_time = datetime.combine(dt.date.today(), time_object)
+            utc_time = utc_timezone.localize(utc_time)
+            iran_timezone = pytz.timezone(DATE_TIME_ZONE)  # Convert to your timezone
+            iran_time = utc_time.astimezone(iran_timezone)
+            use_time = use_time[0] + " | " + str(iran_time.time())
+        if dont_check is False:
             save_data([email, ip_address])
+            last_usage(email, use_time)
 
 
 def job():
@@ -432,7 +452,7 @@ def job():
         else:
             emails_to_ips[email] = [ip]
     using_now = 0
-    country_time_zone = pytz.timezone("iran")  # or another country
+    country_time_zone = pytz.timezone(DATE_TIME_ZONE)  # your date zone
     country_time = datetime.now(country_time_zone)
     country_time = country_time.strftime("%d-%m-%y | %H:%M:%S")
     full_report = ""
@@ -491,6 +511,59 @@ def enable_user_th():
         read_config()
 
 
+def get_updates(offset=None):
+    """get updates form telegram"""
+    BASE_URL = TELEGRAM_BOT_URL.rstrip("/sendMessage") + "/"
+    url = BASE_URL + "getUpdates"
+    params = {"offset": offset, "timeout": 30}
+    response = requests.get(url, params=params)
+    data = response.json()
+    return data["result"]
+
+
+def user_command(user):
+    """get the latest usage of user"""
+    if last_usage_d.get(user):
+        send_logs_to_telegram(str(user) + " : " + str(last_usage_d.get(user)))
+    else:
+        send_logs_to_telegram("User not found")
+
+
+def handle_updates(updates):
+    """handle commands"""
+    for update in updates:
+        if "message" in update:
+            message = update["message"]
+            text = message.get("text")
+            lower_text = text.lower()
+            if lower_text.startswith("/usagetime"):
+                parts = text.split(" ")
+                if len(parts) > 1:
+                    username = parts[1]
+                    user_command(username)
+            if lower_text.startswith("/programmer"):
+                send_logs_to_telegram(
+                    "<code>Houshmand</code>\n<a>github.com/houshmand-2005/V2IpLimit/</a>"
+                )
+
+
+def telegram_updater():
+    """telegram bot"""
+    offset = None
+    if SEND_LOGS_TO_TEL:
+        while True:
+            try:
+                updates = get_updates(offset)
+                if updates:
+                    handle_updates(updates)
+                    offset = updates[-1]["update_id"] + 1
+            except Exception as ex:
+                print(ex)
+                time.sleep(1)
+    else:
+        time.sleep(20)
+
+
 try:
     get_token()
 except Exception:
@@ -511,6 +584,7 @@ if NODES:
 time.sleep(10)
 print("in progress ...")
 time.sleep(10)
+Thread(target=telegram_updater).start()
 Thread(target=enable_user_th).start()
 Thread(target=delete_valid_list).start()
 
