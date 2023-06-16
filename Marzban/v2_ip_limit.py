@@ -286,7 +286,9 @@ async def get_logs(id=0):
                     async with websockets.connect(
                         f"wss://{PANEL_DOMAIN}/api/node/{id}/logs?token={get_token()}"
                     ) as ws:
-                        print(f"Establishing connection for node number {id}")
+                        message = f"Establishing connection for node number {id}"
+                        send_logs_to_telegram(message)
+                        print(message)
                         while True:
                             new_log = await ws.recv()
                             lines = new_log.split("\n")
@@ -296,7 +298,9 @@ async def get_logs(id=0):
                     async with websockets.connect(
                         f"ws://{PANEL_DOMAIN}/api/node/{id}/logs?token={get_token()}"
                     ) as ws:
-                        print(f"Establishing connection for node number {id}")
+                        message = f"Establishing connection for node number {id}"
+                        send_logs_to_telegram(message)
+                        print(message)
                         while True:
                             new_log = await ws.recv()
                             lines = new_log.split("\n")
@@ -316,7 +320,9 @@ async def get_logs(id=0):
                     async with websockets.connect(
                         f"wss://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
                     ) as ws:
-                        print("Establishing connection main server")
+                        message = "Establishing connection main server"
+                        send_logs_to_telegram(message)
+                        print(message)
                         while True:
                             response = await ws.recv()
                             read_logs(response)
@@ -324,7 +330,9 @@ async def get_logs(id=0):
                     async with websockets.connect(
                         f"ws://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
                     ) as ws:
-                        print("Establishing connection main server")
+                        message = "Establishing connection main server"
+                        send_logs_to_telegram(message)
+                        print(message)
                         while True:
                             response = await ws.recv()
                             read_logs(response)
@@ -535,16 +543,17 @@ def handle_updates(updates):
         if "message" in update:
             message = update["message"]
             text = message.get("text")
-            lower_text = text.lower()
-            if lower_text.startswith("/usagetime"):
-                parts = text.split(" ")
-                if len(parts) > 1:
-                    username = parts[1]
-                    user_command(username)
-            if lower_text.startswith("/programmer"):
-                send_logs_to_telegram(
-                    "<code>Houshmand</code>\n<a>github.com/houshmand-2005/V2IpLimit/</a>"
-                )
+            if text:
+                lower_text = text.lower()
+                if lower_text.startswith("/usagetime"):
+                    parts = text.split(" ")
+                    if len(parts) > 1:
+                        username = parts[1]
+                        user_command(username)
+                if lower_text.startswith("/programmer"):
+                    send_logs_to_telegram(
+                        "<code>Houshmand</code>\n<a>github.com/houshmand-2005/V2IpLimit/</a>"
+                    )
 
 
 def telegram_updater():
