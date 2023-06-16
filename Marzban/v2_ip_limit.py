@@ -90,12 +90,12 @@ def send_logs_to_telegram(message):
         if PRETTY_PRINT:
             messages = message.split("\n")
             shorter_messages = [
-                "\n".join(messages[i : i + 95]) for i in range(0, len(messages), 95)
+                "\n".join(messages[i : i + 100]) for i in range(0, len(messages), 100)
             ]
         else:
-            messages = message.split(",")
+            messages = message.split("]")
             shorter_messages = [
-                ",".join(messages[i : i + 95]) for i in range(0, len(messages), 95)
+                "]".join(messages[i : i + 100]) for i in range(0, len(messages), 100)
             ]
         for message in shorter_messages:
             txt_s = str(message.strip())
