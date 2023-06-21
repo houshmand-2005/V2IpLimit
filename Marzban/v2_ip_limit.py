@@ -6,6 +6,7 @@ from datetime import datetime
 import datetime as dt
 from threading import Thread
 import asyncio
+from collections import Counter
 import pytz
 import websockets
 import requests
@@ -454,11 +455,13 @@ def job():
     for d in users_list_l:
         email = d[0]
         ip = d[1]
-        if email in emails_to_ips:
-            if ip not in emails_to_ips[email]:
-                emails_to_ips[email].append(ip)
-        else:
-            emails_to_ips[email] = [ip]
+        ip_counter = Counter([item[1] for item in users_list_l if item[0] == email])
+        if ip_counter[ip] >= 2:
+            if email in emails_to_ips:
+                if ip not in emails_to_ips[email]:
+                    emails_to_ips[email].append(ip)
+            else:
+                emails_to_ips[email] = [ip]
     using_now = 0
     country_time_zone = pytz.timezone(DATE_TIME_ZONE)  # your date zone
     country_time = datetime.now(country_time_zone)
