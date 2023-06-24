@@ -18,5 +18,5 @@
         ["user2", 1]
     ],
     "SERVER_NAME": "",
-    "PRETTY_PRINT": "False"
+    "PRETTY_PRINT": "True"
 }

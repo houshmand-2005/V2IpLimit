@@ -26,7 +26,7 @@ pip install websockets
 pip install pytz
 ```
 
-Then you need to enter your domain or server IP in the v2iplimit config.json file
+Then you need to enter your domain or server IP in the v2iplimit_config.json file
 
 To run this program
 
@@ -60,7 +60,7 @@ You can change [this file](v2iplimit_config.json) according to your needs:
         ["user2", 1]
     ], // --> You can apply any number of IP limit per user like this, user1 can have 4 IPs
   "SERVER_NAME": "", // --> Optional, You can give your script a name that will appear in your logs.
-  "PRETTY_PRINT": "False" // --> Optional, Logs will be sent to you in Telegram with a better appearance (Not recommended for who has a lot of users.)
+  "PRETTY_PRINT": "True" // --> Optional, Logs will be sent to you in Telegram with a better appearance
 }
 ```
 

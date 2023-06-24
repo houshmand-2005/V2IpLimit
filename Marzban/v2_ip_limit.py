@@ -65,6 +65,14 @@ def read_config():
         PRETTY_PRINT = False
     WRITE_LOGS_TF = WRITE_LOGS_TF.lower() == "true"
     SEND_LOGS_TO_TEL = SEND_LOGS_TO_TEL.lower() == "true"
+    if SEND_LOGS_TO_TEL:
+        if "]" in TELEGRAM_BOT_URL or "[" in TELEGRAM_BOT_URL:
+            print(
+                "Invalid telegram Url\nplease delete '[' and ']'"
+                + "\nIt should be like this :\n"
+                + "https://api.telegram.org/bot09155912:A2GP4K2dQ_4fdusN12/sendMessage"
+            )
+            exit()
     (SPECIAL_LIMIT_USERS), (SPECIAL_LIMIT_IP) = list(
         user[0] for user in SPECIAL_LIMIT
     ), list(user[1] for user in SPECIAL_LIMIT)
@@ -509,7 +517,7 @@ def job():
 def delete_valid_list():
     """delete the cache of valid ips"""
     while True:
-        time.sleep(11000)
+        time.sleep(21000)
         print("delete valid list and recreate it")
         VALID_IPS.clear()
 
