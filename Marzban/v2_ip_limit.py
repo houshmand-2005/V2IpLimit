@@ -444,6 +444,8 @@ def read_logs(log=""):
                     VALID_IPS.append(ip_address)
         if dont_check is False:
             use_time = log.split(" ")
+            if "BLOCK]" in use_time:
+                dont_check = True
             time_l = use_time[1]
             time_object = datetime.strptime(time_l, "%H:%M:%S").time()
             utc_timezone = pytz.timezone("UTC")
