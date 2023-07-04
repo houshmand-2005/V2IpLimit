@@ -462,10 +462,8 @@ def read_logs(log=""):
 def job():
     """main function"""
     emails_to_ips = {}
-    for d in users_list_l:
-        email = d[0]
-        ip = d[1]
-        ip_counter = Counter([item[1] for item in users_list_l if item[0] == email])
+    ip_counter = Counter([d[1] for d in users_list_l])
+    for email, ip in users_list_l:
         if ip_counter[ip] >= 2:
             if email in emails_to_ips:
                 if ip not in emails_to_ips[email]:
