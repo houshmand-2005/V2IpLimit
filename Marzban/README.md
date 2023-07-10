@@ -122,7 +122,7 @@ crontab -e
 
 Then add this line to your crontab<br>
 `10 */6 * * * /root/V2IpLimit/Marzban/cronjob.sh >> /root/V2IpLimit/Marzban/cron_logs_run.log 2>&1`
-<br>this means That is, every 6 hours and 10 minutes, disable the program and run it again
+<br>this means every 6 hours and 10 minutes, disable the program and run it again
 
 This way works if you have cloned the project in the <b>root</b>, otherwise you have to change the path of the files according to the location of the folder in the cronjob and [this file](cronjob.sh)
 
