@@ -111,7 +111,7 @@ screen -r {id}
 ### CronJob
 
 ```bash
-chmod +x rn.sh v2_ip_limit.py
+chmod +x cronjob.sh v2_ip_limit.py
 ```
 
 Then open your crontab
