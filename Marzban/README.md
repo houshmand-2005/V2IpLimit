@@ -17,6 +17,7 @@ At first you need add this to your xray config file :
 **then save it**
 
 <hr>
+
 You must install these libraries:
 
 ```bash
@@ -26,16 +27,22 @@ pip install websockets
 pip install pytz
 ```
 
-Then you need to enter your domain or server IP in the v2iplimit_config.json file
-
-To run this program
+Then clone the project
 
 ```bash
 git clone https://github.com/houshmand-2005/V2IpLimit.git
 cd V2IpLimit
 cd Marzban
-python3 v2_ip_limit.py
 ```
+
+Then you need to enter your domain or server IP in the [v2iplimit_config.json](v2iplimit_config.json) file
+
+To run the program You have 2 options :
+
+1. [Using the screen](#screen) (recommended) with this [Video guide](#video-tutorial)
+2. [Using CronJob](#cronjob)
+
+<hr>
 
 You can change [this file](v2iplimit_config.json) according to your needs:
 
@@ -70,8 +77,13 @@ And again after 4 minutes all users are activated and...
 
 <b>As a result, users who use more than the specified IP cannot use their account unless they are equal to or less than the IP limit.</b>
 
-## Important note
+<hr>
 
+## Important notes
+
+### screen
+
+[Video guide](#video-tutorial)<br>
 As you know, this program must always be running, so there are many ways to do this, but I recommend using the screen command (be sure to read about it so you don't get into trouble.)<br>
 First, hit the screen command<br>
 
@@ -82,15 +94,13 @@ screen
 On the screen that opens, press the space bar Then run the program.<br>
 Now you can keep the program running in the background with the combined control A and D. Now if your connection to the server is interrupted, the program will remain running.
 
-<hr>
-To see active screens 
-<br>Run this command<br>
+<b>To see active screens</b> Run this command<br>
 
 ```bash
 screen -ls
 ```
 
-<br>And to go to that screen, this command
+And to go to that screen, this command
 
 ```bash
 screen -r {id}
@@ -98,8 +108,48 @@ screen -r {id}
 
 <hr>
 
-Video tutorial:<br>
+### CronJob
+
+```bash
+chmod +x rn.sh v2_ip_limit.py
+```
+
+Then open your crontab
+
+```bash
+crontab -e
+```
+
+Then add this line to your crontab<br>
+`10 */6 * * * /root/V2IpLimit/Marzban/cronjob.sh >> /root/V2IpLimit/Marzban/cron_logs_run.log 2>&1`
+<br>this means That is, every 6 hours and 10 minutes, disable the program and run it again
+
+This way works if you have cloned the project in the <b>root</b>, otherwise you have to change the path of the files according to the location of the folder in the cronjob and [this file](cronjob.sh)
+
+<hr>
+
+### Tips on location
+
+To change the time of the logs to your local time And considering only the IPs related to your country change line 27 and 28 of the v2_ip_limit.py file (By default they are Iran)
+
+<hr>
+
+### Video tutorial:
+
+<br>
 
 https://github.com/houshmand-2005/V2IpLimit/assets/77535700/7881347e-8b14-4569-a3b0-bc7e5703be39
+
+<hr>
+
+### Donation
+
+If you found V2IpLimit useful and would like to support its development, you can donate on the following crypto network:
+
+- TRON network (TRX): `TLARb1Ns5vA7pH6wqSyZGreDbGooS85Mi5`
+
+Thank you for your support!
+
+<hr>
 
 If this program was useful for you, please give it a star ⭐

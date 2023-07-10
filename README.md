@@ -13,7 +13,19 @@
 [Go to Marzban Version](Marzban/README.md) ♦️
 [Go to V2RayGen Version](V2RayGen/README.md)
 
-<b>
-If this program was useful for you, please give it a star ⭐
+<hr>
+
+### Donation
 
 </center>
+If you found V2IpLimit useful and would like to support its development, you can donate on the following crypto network:
+
+- TRON network (TRX): `TLARb1Ns5vA7pH6wqSyZGreDbGooS85Mi5`
+
+Thank you for your support!
+
+<hr>
+
+<b>
+If this program was useful for you, please give it a star ⭐
+</b>
