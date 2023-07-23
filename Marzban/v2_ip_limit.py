@@ -38,7 +38,7 @@ def read_config():
         print(ex)
         print("cant find v2iplimit_config.json file ")
         exit()
-    global WRITE_LOGS_TF, SEND_LOGS_TO_TEL, LIMIT_NUMBER
+    global WRITE_LOGS_TF, SEND_LOGS_TO_TEL, LIMIT_NUMBER, INACTIVE_DURATION
     global LOG_FILE_NAME, TELEGRAM_BOT_URL, CHAT_ID, SPECIAL_LIMIT_USERS
     global EXCEPT_USERS, PANEL_USERNAME, PANEL_PASSWORD, PRETTY_PRINT
     global PANEL_DOMAIN, TIME_TO_CHECK, SPECIAL_LIMIT, SERVER_NAME
@@ -54,6 +54,10 @@ def read_config():
     PANEL_DOMAIN = str(LOAD_CONFIG_JSON["PANEL_DOMAIN"])
     TIME_TO_CHECK = int(LOAD_CONFIG_JSON["TIME_TO_CHECK"])
     SPECIAL_LIMIT = LOAD_CONFIG_JSON["SPECIAL_LIMIT"]
+    try:
+        INACTIVE_DURATION = int(LOAD_CONFIG_JSON["INACTIVE_DURATION"])
+    except KeyError:
+        INACTIVE_DURATION = TIME_TO_CHECK - 5
     try:
         SERVER_NAME = str(LOAD_CONFIG_JSON["SERVER_NAME"])
     except KeyError:
@@ -525,7 +529,7 @@ def delete_valid_list():
 def enable_user_th():
     """run enable user func"""
     while True:
-        time.sleep(int(TIME_TO_CHECK + TIME_TO_CHECK))
+        time.sleep(INACTIVE_DURATION)
         enable_user()
         read_config()
 

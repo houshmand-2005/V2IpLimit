@@ -62,6 +62,7 @@ You can change [this file](v2iplimit_config.json) according to your needs:
   "PANEL_PASSWORD": "admin", // --> Add your Marzban password here
   "PANEL_DOMAIN": "sub.domain.com:443", // --> Add your Marzban domain name with port here
   "TIME_TO_CHECK": 240, // --> Check every x seconds (240 = 4minutes)
+  "INACTIVE_DURATION": 210, // --> You can specify how long users should be disabled (in seconds)
   "SPECIAL_LIMIT": [
         ["user1", 4],
         ["user2", 1]
@@ -72,8 +73,8 @@ You can change [this file](v2iplimit_config.json) according to your needs:
 ```
 
 <br>
-This program is activated every <b>4 minutes (you can change it)</b>, it sends information, and users who have used more than the specified number of IPs are deactivated, and after 4 minutes, all users are activated. And it is checked again if there is a need to deactivate the user in these 4 minutes, and if so, it will do so.
-And again after 4 minutes all users are activated and...
+This program is activated every <b>4 minutes (you can change it with <code>TIME_TO_CHECK</code>)</b>, it sends information, and users who have used more than the specified number of IPs are deactivated, and after x minutes(According to <code>INACTIVE_DURATION</code>), all users are activated. And it is checked again if there is a need to deactivate the user in these x minutes, and if so, it will do so.
+And again after x minutes all users are activated and...
 
 <b>As a result, users who use more than the specified IP cannot use their account unless they are equal to or less than the IP limit.</b>
 
@@ -92,6 +93,11 @@ screen
 ```
 
 On the screen that opens, press the space bar Then run the program.<br>
+
+```bash
+python3 v2_ip_limit.py
+```
+
 Now you can keep the program running in the background with the combined control A and D. Now if your connection to the server is interrupted, the program will remain running.
 
 <b>To see active screens</b> Run this command<br>
@@ -122,15 +128,17 @@ crontab -e
 
 Then add this line to your crontab<br>
 `10 */6 * * * /root/V2IpLimit/Marzban/cronjob.sh >> /root/V2IpLimit/Marzban/cron_logs_run.log 2>&1`
-<br>this means every 6 hours and 10 minutes, disable the program and run it again
+<br>this means every 6 hours and 10 minutes, disable the program and run it again(You can change the time of this scheduling. [tutorial](https://cloud.google.com/scheduler/docs/configuring/cron-job-schedules))
 
 This way works if you have cloned the project in the <b>root</b>, otherwise you have to change the path of the files according to the location of the folder in the cronjob and [this file](cronjob.sh)
+
+every time the crontab is working, it adds a logs to this file <code>crontab_log.log</code><sub>(in this path V2IpLimit/Marzban/)</sub> so with this you can make sure your scheduling is working
 
 <hr>
 
 ### Tips on location
 
-To change the time of the logs to your local time And considering only the IPs related to your country change line 27 and 28 of the v2_ip_limit.py file (By default they are Iran)
+To change the time of the logs to your local time And considering only the IPs related to your country change line 27 and 28 of the [v2_ip_limit.py](v2_ip_limit.py) file. <sub>(By default they are Iran)</sub>
 
 <hr>
 
