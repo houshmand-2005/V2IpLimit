@@ -297,7 +297,7 @@ async def get_logs(id=0):
             try:
                 try:
                     async with websockets.connect(
-                        f"wss://{PANEL_DOMAIN}/api/node/{id}/logs?token={get_token()}"
+                        f"wss://{PANEL_DOMAIN}/api/node/{id}/logs?interval=0.7&token={get_token()}"
                     ) as ws:
                         message = f"Establishing connection for node number {id}"
                         send_logs_to_telegram(message)
@@ -309,7 +309,7 @@ async def get_logs(id=0):
                                 read_logs(line)
                 except Exception:
                     async with websockets.connect(
-                        f"ws://{PANEL_DOMAIN}/api/node/{id}/logs?token={get_token()}"
+                        f"ws://{PANEL_DOMAIN}/api/node/{id}/logs?interval=0.7&token={get_token()}"
                     ) as ws:
                         message = f"Establishing connection for node number {id}"
                         send_logs_to_telegram(message)
@@ -331,7 +331,7 @@ async def get_logs(id=0):
             try:
                 try:
                     async with websockets.connect(
-                        f"wss://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
+                        f"wss://{PANEL_DOMAIN}/api/core/logs?interval=0.7&token={get_token()}"
                     ) as ws:
                         message = "Establishing connection main server"
                         send_logs_to_telegram(message)
@@ -341,7 +341,7 @@ async def get_logs(id=0):
                             read_logs(response)
                 except Exception:
                     async with websockets.connect(
-                        f"ws://{PANEL_DOMAIN}/api/core/logs?token={get_token()}"
+                        f"ws://{PANEL_DOMAIN}/api/core/logs?interval=0.7&token={get_token()}"
                     ) as ws:
                         message = "Establishing connection main server"
                         send_logs_to_telegram(message)
