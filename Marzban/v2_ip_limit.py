@@ -304,7 +304,7 @@ async def get_logs(id=0):
                         print(message)
                         while True:
                             new_log = await ws.recv()
-                            lines = new_log.split("\n")
+                            lines = new_log.splitlines()
                             for line in lines:
                                 read_logs(line)
                 except Exception:
@@ -316,7 +316,7 @@ async def get_logs(id=0):
                         print(message)
                         while True:
                             new_log = await ws.recv()
-                            lines = new_log.split("\n")
+                            lines = new_log.splitlines()
                             for line in lines:
                                 read_logs(line)
             except Exception as ex:
@@ -337,8 +337,10 @@ async def get_logs(id=0):
                         send_logs_to_telegram(message)
                         print(message)
                         while True:
-                            response = await ws.recv()
-                            read_logs(response)
+                            new_log = await ws.recv()
+                            lines = new_log.splitlines()
+                            for line in lines:
+                                read_logs(line)
                 except Exception:
                     async with websockets.connect(
                         f"ws://{PANEL_DOMAIN}/api/core/logs?interval=0.7&token={get_token()}"
@@ -347,8 +349,10 @@ async def get_logs(id=0):
                         send_logs_to_telegram(message)
                         print(message)
                         while True:
-                            response = await ws.recv()
-                            read_logs(response)
+                            new_log = await ws.recv()
+                            lines = new_log.splitlines()
+                            for line in lines:
+                                read_logs(line)
             except Exception as ex:
                 print(ex)
                 message = "main server doesn't work"
