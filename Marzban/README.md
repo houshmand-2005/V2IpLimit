@@ -51,7 +51,7 @@ You can change [this file](v2iplimit_config.json) according to your needs:
   "WRITE_LOGS_TF": "True", // --> write the logs like who disable and how many users are active now and ...
   "SEND_LOGS_TO_TEL": "False", // --> send logs to a telegram bot
   "LIMIT_NUMBER": 2, // --> number of active IPs for all users
-  "LOG_FILE_NAME": "ip_email.log",
+  "LOG_FILE_NAME": "log_file_name.log",
   "TELEGRAM_BOT_URL": "https://api.telegram.org/bot[add_your_bot_token_here]/sendMessage", // --> get your token from @BotFather and delete the '[' and ']'
   "CHAT_ID": 111111111, // get from here --> @RawDataBot
   "EXCEPT_USERS": [

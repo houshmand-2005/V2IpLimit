@@ -36,7 +36,9 @@ def read_config():
             LOAD_CONFIG_JSON = json.loads(CONFIG_FILE.read())
     except Exception as ex:
         print(ex)
-        print("cant find v2iplimit_config.json file ")
+        print(
+            "Unable to Locate v2iplimit_config.json File Or Invalid JSON Syntax in Config File"
+        )
         exit()
     global WRITE_LOGS_TF, SEND_LOGS_TO_TEL, LIMIT_NUMBER, INACTIVE_DURATION
     global LOG_FILE_NAME, TELEGRAM_BOT_URL, CHAT_ID, SPECIAL_LIMIT_USERS
@@ -596,8 +598,8 @@ try:
     get_token()
 except Exception:
     print(
-        "Wrong url or ip address"
-        + "\nplease check your value in v2iplimit_config.json file"
+        "Incorrect URL Or Port Or IP Address Or Username Or Password"
+        + "\nplease check your values in v2iplimit_config.json file"
     )
     exit()
 Thread(target=get_logs_run).start()
