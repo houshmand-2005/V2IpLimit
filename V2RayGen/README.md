@@ -29,7 +29,7 @@ python3 v2_ip_limit.py
 
 You can change [this file](v2iplimit_config.json) according to your needs:
 
-```bash
+```json
 {
   "WRITE_LOGS_TF": "True", // ----> write the logs like who disable and how many users are active now and ...
   "SEND_LOGS_TO_TEL": "False", // ----> send logs to a telegram bot
