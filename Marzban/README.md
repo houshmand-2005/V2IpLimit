@@ -7,7 +7,7 @@ It also supports Marzban-node<br>
 
 At first you need add this to your xray config file :
 
-```bash
+```json
 "log": {
     "loglevel": "info"
 },
@@ -46,7 +46,7 @@ To run the program You have 2 options :
 
 You can change [this file](v2iplimit_config.json) according to your needs:
 
-```bash
+```json
 {
   "WRITE_LOGS_TF": "True", // --> write the logs like who disable and how many users are active now and ...
   "SEND_LOGS_TO_TEL": "False", // --> send logs to a telegram bot
