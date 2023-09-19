@@ -148,6 +148,8 @@ To change the time of the logs to your local time And considering only the IPs r
 
 https://github.com/houshmand-2005/V2IpLimit/assets/77535700/7881347e-8b14-4569-a3b0-bc7e5703be39
 
+Additionally, a friend has created a video that you can watch here (in Persian):<br>
+https://www.youtube.com/watch?v=TbC9lhShuA8
 <hr>
 
 ### Donation
