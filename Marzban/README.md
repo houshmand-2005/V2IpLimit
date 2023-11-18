@@ -182,7 +182,7 @@ To change the time of the logs to your local time And considering only the IPs r
 3. **Connections Persisting After Disabling**
 
    - Users remain connected even after disabling. Why?
-   - This issue is related to the xray core. Connections persist until the user manually closes them. So you have to wait a little until all the reactors are closed
+   - This issue is related to the xray core. Connections persist until the user manually closes them. So you have to wait a little until all the connections are closed
 
 4. **Restarting After Changing JSON Config File**
 
