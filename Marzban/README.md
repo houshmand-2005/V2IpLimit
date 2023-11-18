@@ -66,7 +66,7 @@ After that you need to enter your domain or server IP(and other information) in 
 To run the program You have 2 options :
 
 1. [Using the screen](#screen) (recommended) with this [Video guide](#video-tutorial)
-2. [Using CronJob](#cronjob)
+2. [Using CronJob](#cronjob) (if you have a lot user then probably this one is better)
 
 <hr>
 
