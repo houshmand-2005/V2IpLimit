@@ -5,7 +5,24 @@ Limiting the number of active users with IP
 <br>
 It also supports Marzban-node<br>
 
-At first you need add this to your xray config file :
+## Table of Contents
+
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Run the Script](#run-the-script)
+- [Important Notes](#important-notes)
+  - [Screen](#screen)
+  - [CronJob](#cronjob)
+  - [Tips on Location](#tips-on-location)
+- [Common Issues and Solutions](#common-issues-and-solutions)
+- [Video Tutorial](#video-tutorial)
+- [Donation](#donation)
+
+<hr>
+
+# Installation
+
+At first you need add this to your xray config file(If it doesn't exist) :
 
 ```json
 "log": {
@@ -16,13 +33,18 @@ At first you need add this to your xray config file :
 ![loglevel](https://github.com/houshmand-2005/V2IpLimit/assets/77535700/e4b72d49-e523-4f7b-b22c-dd2f1c4403a3)
 **then save it**
 
-<hr>
+Attention, this script only supports Python version 3.8 and above. If your Python is old, please update it(you can check your python version with `python3 -V`).
 
-You must install these libraries:
+At first update your system and install pip
 
 ```bash
 sudo apt update
-apt install python3-pip
+sudo apt install python3-pip
+```
+
+And Then you need install these libraries:
+
+```bash
 pip install websockets
 pip install pytz
 ```
@@ -35,7 +57,11 @@ cd V2IpLimit
 cd Marzban
 ```
 
-Then you need to enter your domain or server IP in the [v2iplimit_config.json](v2iplimit_config.json) file
+After that you need to enter your domain or server IP(and other information) in the [v2iplimit_config.json](v2iplimit_config.json) file
+
+<hr>
+
+## Run the Script
 
 To run the program You have 2 options :
 
@@ -43,6 +69,8 @@ To run the program You have 2 options :
 2. [Using CronJob](#cronjob)
 
 <hr>
+
+## configuration
 
 You can change [this file](v2iplimit_config.json) according to your needs:
 
@@ -54,19 +82,16 @@ You can change [this file](v2iplimit_config.json) according to your needs:
   "LOG_FILE_NAME": "log_file_name.log",
   "TELEGRAM_BOT_URL": "https://api.telegram.org/bot[add_your_bot_token_here]/sendMessage", // --> get your token from @BotFather and delete the '[' and ']'
   "CHAT_ID": 111111111, // get from here --> @RawDataBot
-  "EXCEPT_USERS": [
-        "Username",
-        "Username2"
-  ], // --> Accounts in this list will not be deactivated
+  "EXCEPT_USERS": ["Username", "Username2"], // --> Accounts in this list will not be deactivated
   "PANEL_USERNAME": "admin", // --> Add your Marzban username here
   "PANEL_PASSWORD": "admin", // --> Add your Marzban password here
   "PANEL_DOMAIN": "sub.domain.com:443", // --> Add your Marzban domain name with port here
   "TIME_TO_CHECK": 240, // --> Check every x seconds (240 = 4minutes)
   "INACTIVE_DURATION": 210, // --> You can specify how long users should be disabled (in seconds)
   "SPECIAL_LIMIT": [
-        ["user1", 4],
-        ["user2", 1]
-    ], // --> You can apply any number of IP limit per user like this, user1 can have 4 IPs
+    ["user1", 4],
+    ["user2", 1]
+  ], // --> You can apply any number of IP limit per user like this, user1 can have 4 IPs
   "SERVER_NAME": "", // --> Optional, You can give your script a name that will appear in your logs.
   "PRETTY_PRINT": "True" // --> Optional, Logs will be sent to you in Telegram with a better appearance
 }
@@ -142,6 +167,48 @@ To change the time of the logs to your local time And considering only the IPs r
 
 <hr>
 
+#### **Common Issues and Solutions**
+
+1. **Incorrect Count of Connected IPs**
+
+   - Why does the number of detected IPs decrease after a while?
+   - This problem arises when the WebSocket connection becomes corrupted during log transmission. So you can use [CronJob](#cronjob) method
+
+2. **Uninstalling V2IpLimit Script**
+
+   - How can I uninstall the V2IpLimit script?
+   - Simply delete the folder with `rm -rf V2IpLimit`. If the script is running, stop it by pressing `CTRL + C`.
+
+3. **Connections Persisting After Disabling**
+
+   - Users remain connected even after disabling. Why?
+   - This issue is related to the xray core. Connections persist until the user manually closes them. So you have to wait a little until all the reactors are closed
+
+4. **Restarting After Changing JSON Config File**
+
+   - Is a restart needed after modifying the JSON config file?
+   - No, a restart isn't necessary. The program adapts to changes after the specified `INACTIVE_DURATION`.
+
+5. **Running Script on Different VPS**
+
+   - Can I run the script on a different VPS?
+   - Absolutely, the script is flexible and works seamlessly on any VPS or even on your local machine.
+
+6. **Tunneling and User IP Detection**
+
+   - Tunneling returns the tunnel server IP for users. Any solutions?
+   - Tunneling poses challenges. For better IP detection, consider alternative methods [Read More Here](https://github.com/houshmand-2005/V2IpLimit/issues/3)
+
+7. **I'm not from Iran and script says There is no active user**
+
+   - If you don't live in Iran you must replace your location in the code
+     [IP_LOCATION](https://github.com/houshmand-2005/V2IpLimit/blob/a32d314f9f32b84c0a155fbbf93ef2a68370a0ab/Marzban/v2_ip_limit.py#L27)
+     because script only considers IPs related to your location (to increase accuracy)
+     you can get your timezone and your location from https://ip-api.com/
+     Also it isf better to replace your timezone[(DATE_TIME_ZONE)](https://github.com/houshmand-2005/V2IpLimit/blob/a32d314f9f32b84c0a155fbbf93ef2a68370a0ab/Marzban/v2_ip_limit.py#L28C1-L28C1) that this site gave you so that the logs show you the correct time. [For More information read Here](https://github.com/houshmand-2005/V2IpLimit/issues/18)
+
+<hr>
+
 ### Video tutorial:
 
 <br>
@@ -150,6 +217,7 @@ https://github.com/houshmand-2005/V2IpLimit/assets/77535700/7881347e-8b14-4569-a
 
 Additionally, a friend has created a video that you can watch here (in Persian):<br>
 https://www.youtube.com/watch?v=TbC9lhShuA8
+
 <hr>
 
 ### Donation
