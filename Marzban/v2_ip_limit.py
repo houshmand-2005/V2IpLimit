@@ -2,6 +2,7 @@ import ipaddress
 import json
 import re
 import time
+import os
 from datetime import datetime
 import datetime as dt
 from threading import Thread
@@ -242,7 +243,24 @@ def enable_user():
         message = f"\nenable user : {username}"
         send_logs_to_telegram(message)
         write_log(message)
+        read_disable_users()
         print(message)
+
+
+def add_disable_user(username):
+    """Add disable users to disable_users.json file"""
+    if not os.path.exists("disable_users.json"):
+        with open("disable_users.json", "w") as file:
+            json.dump({"disable_user": []}, file)
+    try:
+        with open("disable_users.json", "r") as file:
+            data = json.load(file)
+        data["disable_user"].append(username)
+    except Exception as err:
+        print("disable_user.json Isn't valid!\n", err)
+        exit()
+    with open("disable_users.json", "w") as file:
+        json.dump(data, file)
 
 
 def disable_user(user_email_v2):
@@ -263,6 +281,7 @@ def disable_user(user_email_v2):
     except Exception:
         url = url.replace("https://", "http://")
         requests.put(url, data=json.dumps(status), headers=headers)
+    add_disable_user(user_email_v2)
     INACTIVE_USERS.append(user_email_v2)
     message = f"\ndisable user : {username}"
     send_logs_to_telegram(message)
@@ -272,7 +291,27 @@ def disable_user(user_email_v2):
 
 # If there was a problem in deactivating users you can activate all users by :
 # enable_all_user()
+def read_disable_users():
+    """Read disable users from disable_users.json file and then clean it"""
+    if not os.path.exists("disable_users.json"):
+        return
+    try:
+        with open("disable_users.json", "r") as file:
+            data = json.load(file)
+        disable_user_list = data["disable_user"]
+    except Exception as err:
+        print("disable_user.json Isn't valid!\n", err)
+        exit()
+    data["disable_user"] = []
+    with open("disable_users.json", "w") as file:
+        json.dump(data, file)
+    return disable_user_list
 
+
+INACTIVE_USERS = read_disable_users()
+if INACTIVE_USERS:
+    enable_user()
+INACTIVE_USERS = []
 users_list_l = []
 last_usage_d = {}
 
