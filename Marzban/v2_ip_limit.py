@@ -527,6 +527,7 @@ def job():
     full_report_t = ""
     active_users = ""
     active_users_tl = []
+    user_ip = ""
     for email, user_ip in emails_to_ips.items():
         active_users = str(email) + " [ " + str(len(user_ip)) + " IPs ]" + str(user_ip)
         active_users_tl.append([email, len(user_ip), user_ip])
@@ -558,7 +559,9 @@ def job():
             + f"\nall active users(IPs) : [ {using_now} ]"
         )
     else:
-        print("There is no active user")
+        no_active_user_msg = "There is no active user"
+        send_logs_to_telegram(no_active_user_msg)
+        print(no_active_user_msg)
     using_now = 0
     clear_data()
 
@@ -664,9 +667,9 @@ while True:
         print("-----done-----")
         time.sleep(int(TIME_TO_CHECK + 3))
     except Exception as ex:
-        send_logs_to_telegram(ex)
+        send_logs_to_telegram("Error : " + str(ex))
         write_log("\n" + str(ex))
-        print(ex)
+        print(str(ex))
         time.sleep(10)
 
 # |------------------------------------|
