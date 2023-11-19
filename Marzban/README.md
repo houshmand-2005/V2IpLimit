@@ -66,7 +66,7 @@ After that you need to enter your domain or server IP(and other information) in 
 To run the program You have 2 options :
 
 1. [Using the screen](#screen) (recommended) with this [Video guide](#video-tutorial)
-2. [Using CronJob](#cronjob)
+2. [Using CronJob](#cronjob) (if you have a lot user then probably this one is better)
 
 <hr>
 
@@ -182,7 +182,7 @@ To change the time of the logs to your local time And considering only the IPs r
 3. **Connections Persisting After Disabling**
 
    - Users remain connected even after disabling. Why?
-   - This issue is related to the xray core. Connections persist until the user manually closes them. So you have to wait a little until all the reactors are closed
+   - This issue is related to the xray core. Connections persist until the user manually closes them. So you have to wait a little until all the connections are closed
 
 4. **Restarting After Changing JSON Config File**
 
