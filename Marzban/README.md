@@ -3,7 +3,7 @@
 Limiting the number of active users with IP
 <br>[**Marzban version**](https://github.com/Gozargah/Marzban)
 <br>
-It also supports Marzban-node<br>
+Supports both IPv4 and IPv6.It also supports Marzban-node<br>
 
 ## Table of Contents
 

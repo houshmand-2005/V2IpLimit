@@ -458,16 +458,22 @@ def read_logs(log=""):
     else:
         dont_check = True
     if dont_check is False:
-        ip_address = re.search(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", log)
-        if ip_address:
-            ip_address = ip_address.group(1)
-            try:
-                ipaddress.ip_address(ip_address)
-            except ValueError:
-                dont_check = True
-            if ip_address in INVALID_IPS:
-                dont_check = True
+        ip_v6 = re.search(r"\[([0-9a-fA-F:]+)\]:\d+\s+accepted", log)
+        if ip_v6:
+            ip_v6 = ip_v6.group(1)
         else:
+            ip_address = re.search(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", log)
+            if ip_address:
+                ip_address = ip_address.group(1)
+                try:
+                    ipaddress.ip_address(ip_address)
+                except ValueError:
+                    dont_check = True
+                if ip_address in INVALID_IPS:
+                    dont_check = True
+            else:
+                dont_check = True
+        if ip_v6 in INVALID_IPS:
             dont_check = True
         if dont_check is False:
             email_m = re.search(r"email:\s*([A-Za-z0-9._%+-]+)", log)
@@ -478,19 +484,22 @@ def read_logs(log=""):
                     dont_check = True
             else:
                 dont_check = True
-        if dont_check is False:
-            if ip_address in VALID_IPS:
-                pass
-            else:
-                loc = check_ip(ip_address)
-                if loc != IP_LOCATION:
-                    if loc != "unknownip2":
-                        INVALID_IPS.append(ip_address)
-                        dont_check = True
+        if not ip_v6:
+            if dont_check is False:
+                if ip_address in VALID_IPS:
+                    pass
+                else:
+                    loc = check_ip(ip_address)
+                    if loc != IP_LOCATION:
+                        if loc != "unknownip2":
+                            INVALID_IPS.append(ip_address)
+                            dont_check = True
+                        else:
+                            VALID_IPS.append(ip_address)
                     else:
                         VALID_IPS.append(ip_address)
-                else:
-                    VALID_IPS.append(ip_address)
+        else:
+            ip_address = ip_v6
         if dont_check is False:
             use_time = log.split(" ")
             if "BLOCK]" in use_time:
