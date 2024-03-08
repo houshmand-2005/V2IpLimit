@@ -1,16 +1,17 @@
+import asyncio
+import datetime as dt
 import ipaddress
 import json
+import os
 import re
 import time
-import os
-from datetime import datetime
-import datetime as dt
-from threading import Thread
-import asyncio
 from collections import Counter
+from datetime import datetime
+from threading import Thread
+
 import pytz
-import websockets
 import requests
+import websockets
 
 INVALID_EMAIL = [
     "API]",
@@ -80,9 +81,10 @@ def read_config():
                 + "https://api.telegram.org/bot09155912:A2GP4K2dQ_4fdusN12/sendMessage"
             )
             exit()
-    (SPECIAL_LIMIT_USERS), (SPECIAL_LIMIT_IP) = list(
-        user[0] for user in SPECIAL_LIMIT
-    ), list(user[1] for user in SPECIAL_LIMIT)
+    (SPECIAL_LIMIT_USERS), (SPECIAL_LIMIT_IP) = (
+        list(user[0] for user in SPECIAL_LIMIT),
+        list(user[1] for user in SPECIAL_LIMIT),
+    )
     SPECIAL_LIMIT = {}
     for key in SPECIAL_LIMIT_USERS:
         for value in SPECIAL_LIMIT_IP:
@@ -598,6 +600,13 @@ def get_updates(offset=None):
     params = {"offset": offset, "timeout": 30}
     response = requests.get(url, params=params)
     data = response.json()
+    if data["ok"] is False:
+        error_text = f"Telegram API error: {data['error_code']} - {data['description']}"
+        print(error_text)
+        write_log("\n" + error_text)
+        return None
+    if not data:
+        return None
     return data["result"]
 
 
@@ -626,6 +635,10 @@ def handle_updates(updates):
                     send_logs_to_telegram(
                         "<code>Houshmand</code>\n<a>github.com/houshmand-2005/V2IpLimit/</a>"
                     )
+        else:
+            error_text = f"Unexpected update structure: {update}"
+            print(error_text)  # Debugging output
+            write_log("\n" + error_text)
 
 
 def telegram_updater():
