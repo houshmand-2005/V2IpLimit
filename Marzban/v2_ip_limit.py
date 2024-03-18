@@ -595,7 +595,7 @@ def enable_user_th():
 
 def get_updates(offset=None):
     """get updates form telegram"""
-    BASE_URL = TELEGRAM_BOT_URL.rstrip("/sendMessage") + "/"
+    BASE_URL = TELEGRAM_BOT_URL.replace("sendMessage", "")
     url = BASE_URL + "getUpdates"
     params = {"offset": offset, "timeout": 30}
     response = requests.get(url, params=params)
