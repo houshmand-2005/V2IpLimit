@@ -3,7 +3,7 @@ from ssl import SSLError
 import httpx
 
 from utils.logs import logger
-from utils.types import PanelCredentials, UserType, NodeData
+from utils.types import PanelCredentials, UserType, NodeType
 
 
 async def get_token(panel_data: PanelCredentials) -> PanelCredentials | ValueError:
@@ -253,7 +253,7 @@ async def disable_user(
 # import json
 
 
-async def get_nodes(panel_data: PanelCredentials) -> list[NodeData] | ValueError:
+async def get_nodes(panel_data: PanelCredentials) -> list[NodeType] | ValueError:
     """
     Get the IDs of all nodes from the panel API.
 
@@ -262,7 +262,7 @@ async def get_nodes(panel_data: PanelCredentials) -> list[NodeData] | ValueError
         the username, password, and domain for the panel API.
 
     Returns:
-        list[NodeData]: The list of IDs and other information of all nodes.
+        list[NodeType]: The list of IDs and other information of all nodes.
 
     Raises:
         ValueError: If the function fails to get the nodes from both the HTTP
@@ -285,7 +285,7 @@ async def get_nodes(panel_data: PanelCredentials) -> list[NodeData] | ValueError
             user_inform = response.json()
             for node in user_inform:
                 all_nodes.append(
-                    NodeData(
+                    NodeType(
                         node_id=node["id"],
                         node_name=node["name"],
                         node_ip=node["address"],
