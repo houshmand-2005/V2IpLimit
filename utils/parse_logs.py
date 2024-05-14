@@ -1,3 +1,7 @@
+"""
+This module contains functions to parse and validate logs.
+"""
+
 import ipaddress
 import random
 import re
@@ -73,7 +77,7 @@ async def check_ip(ip_address: str) -> None | str:
         if country:
             CACHE[ip_address] = country
         return country
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         return None
 
 
@@ -109,7 +113,8 @@ async def parse_logs(log: str) -> list[str, str, str]:
         log (str): The log to parse.
 
     Returns:
-        list: A list of lists. Each inner list contains an email, an IP address, and the type of the IP address (ipv4 or ipv6).
+        list: A list of lists. Each inner list contains an email,
+        an IP address, and the type of the IP address (ipv4 or ipv6).
     """
 
     lines = log.splitlines()
