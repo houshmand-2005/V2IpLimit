@@ -1,3 +1,7 @@
+"""
+This module contains the data classes used in the application.
+"""
+
 from dataclasses import dataclass
 
 
