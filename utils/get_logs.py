@@ -1,8 +1,17 @@
+"""
+This module contains functions to get logs from the panel and nodes.
+"""
+
 import asyncio
 from asyncio import Task
 from ssl import SSLError
 
-import websockets.client
+try:
+    import websockets.client
+except ImportError:
+    print(
+        "Module 'websockets' is not installed use: 'pip install websockets' to install it"
+    )
 
 from utils.logs import logger
 from utils.panel_api import get_nodes, get_token
@@ -39,7 +48,7 @@ async def get_panel_logs(panel_data: PanelType) -> None:
 
             except SSLError:
                 break
-            except Exception as error:
+            except Exception as error:  # pylint: disable=broad-except
                 logger.error(
                     "[Main panel] Failed to connect %s trying 20 secned later!", error
                 )
@@ -65,9 +74,10 @@ async def get_nodes_logs(panel_data: PanelType, node: NodeType) -> None:
     for scheme in ["ws", "wss"]:
         while True:
             try:
-                async with websockets.client.connect(
-                    f"{scheme}://{panel_data.panel_domain}/api/node/{node.node_id}/logs?interval=0.7&token={token}"
-                ) as ws:
+                url = (
+                    f"{scheme}://{panel_data.panel_domain}/api/node/{node.node_id}/logs?interval=0.7&token={token}",  # pylint: disable=line-too-long
+                )
+                async with websockets.client.connect(url) as ws:
                     logger.info(
                         "Establishing connection for node number %s", node.node_id
                     )
@@ -76,9 +86,9 @@ async def get_nodes_logs(panel_data: PanelType, node: NodeType) -> None:
                         await parse_logs(new_log)
             except SSLError:
                 break
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 logger.error(
-                    "[node id: %s] [node name: %s] [node ip: %s] [node status: %s] [node message: %s]",
+                    "[node id: %s] [node name: %s] [node ip: %s] [node status: %s] [node message: %s]",  # pylint: disable=line-too-long
                     node.node_id,
                     node.node_name,
                     node.node_ip,

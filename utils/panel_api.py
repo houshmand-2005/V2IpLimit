@@ -1,3 +1,7 @@
+"""
+This module contains functions to interact with the panel API.
+"""
+
 from ssl import SSLError
 
 import httpx
@@ -42,10 +46,13 @@ async def get_token(panel_data: PanelType) -> PanelType | ValueError:
             continue
         except SSLError:
             continue
-        except Exception as error:
+        except Exception as error:  # pylint: disable=broad-except
             logger.error("An unexpected error occurred: %s", error)
             continue
-    message = "Failed to get token. make sure the panel is running and the username and password are correct."
+    message = (
+        "Failed to get token. make sure the panel is running "
+        + "and the username and password are correct."
+    )
 
     logger.error(message)
     raise ValueError(message)
@@ -90,10 +97,13 @@ async def all_user(panel_data: PanelType) -> list[UserType] | ValueError:
                 response.text,
             )
             continue
-        except Exception as error:
+        except Exception as error:  # pylint: disable=broad-except
             logger.error("An unexpected error occurred: %s", error)
             continue
-    message = "Failed to get users. make sure the panel is running and the username and password are correct."
+    message = (
+        "Failed to get users. make sure the panel is running "
+        + "and the username and password are correct."
+    )
     logger.error(message)
     raise ValueError(message)
 
@@ -142,7 +152,7 @@ async def enable_all_user(panel_data: PanelType) -> None | ValueError:
                     response.text,
                 )
                 continue
-            except Exception as error:
+            except Exception as error:  # pylint: disable=broad-except
                 logger.error("An unexpected error occurred: %s", error)
     logger.info("Enabled all users")
 
@@ -191,7 +201,7 @@ async def enable_selected_users(
                     response.text,
                 )
                 continue
-            except Exception as error:
+            except Exception as error:  # pylint: disable=broad-except
                 logger.error("An unexpected error occurred: %s", error)
                 continue
     logger.info("Enabled selected users")
@@ -238,10 +248,13 @@ async def disable_user(panel_data: PanelType, username: UserType) -> None | Valu
                 response.text,
             )
             continue
-        except Exception as error:
+        except Exception as error:  # pylint: disable=broad-except
             logger.error("An unexpected error occurred: %s", error)
             continue
-    message = f"Failed to disable user: {username.name}. Make sure the panel is running and the username and password are correct."
+    message = (
+        f"Failed to disable user: {username.name}. Make sure the panel is running "
+        + "and the username and password are correct."
+    )
     logger.error(message)
     raise ValueError(message)
 
@@ -296,9 +309,12 @@ async def get_nodes(panel_data: PanelType) -> list[NodeType] | ValueError:
                 response.text,
             )
             continue
-        except Exception as error:
+        except Exception as error:  # pylint: disable=broad-except
             logger.error("An unexpected error occurred: %s", error)
             continue
-    message = "Failed to get nodes. make sure the panel is running and the username and password are correct."
+    message = (
+        "Failed to get nodes. make sure the panel is running "
+        + "and the username and password are correct."
+    )
     logger.error(message)
     raise ValueError(message)
