@@ -3,7 +3,7 @@ from ssl import SSLError
 import httpx
 
 from utils.logs import logger
-from utils.types import PanelType, UserType, NodeType
+from utils.types import NodeType, PanelType, UserType
 
 
 async def get_token(panel_data: PanelType) -> PanelType | ValueError:
@@ -244,11 +244,6 @@ async def disable_user(panel_data: PanelType, username: UserType) -> None | Valu
     message = f"Failed to disable user: {username.name}. Make sure the panel is running and the username and password are correct."
     logger.error(message)
     raise ValueError(message)
-
-
-# from utils.types import PanelType
-# import httpx
-# import json
 
 
 async def get_nodes(panel_data: PanelType) -> list[NodeType] | ValueError:
