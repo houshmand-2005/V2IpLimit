@@ -6,7 +6,10 @@ import ipaddress
 import random
 import re
 
-import httpx
+try:
+    import httpx
+except ImportError:
+    print("Module 'httpx' is not installed use: 'pip install httpx' to install it")
 
 from utils.logs import logger
 

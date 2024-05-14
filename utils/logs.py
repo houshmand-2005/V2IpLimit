@@ -1,3 +1,8 @@
+"""
+This module sets up the logging configuration for the application.
+It configures a rotating file handler and a stream handler for the root logger.
+"""
+
 import logging
 from logging.handlers import RotatingFileHandler
 
