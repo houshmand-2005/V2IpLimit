@@ -3,14 +3,14 @@ from ssl import SSLError
 import httpx
 
 from utils.logs import logger
-from utils.types import PanelCredentials, UserType, NodeType
+from utils.types import PanelType, UserType, NodeType
 
 
-async def get_token(panel_data: PanelCredentials) -> PanelCredentials | ValueError:
+async def get_token(panel_data: PanelType) -> PanelType | ValueError:
     """
     Get access token from the panel API.
     Args:
-        panel_data (PanelCredentials): A PanelCredentials object containing
+        panel_data (PanelType): A PanelType object containing
         the username, password, and domain for the panel API.
 
     Returns:
@@ -51,12 +51,12 @@ async def get_token(panel_data: PanelCredentials) -> PanelCredentials | ValueErr
     raise ValueError(message)
 
 
-async def all_user(panel_data: PanelCredentials) -> list[UserType] | ValueError:
+async def all_user(panel_data: PanelType) -> list[UserType] | ValueError:
     """
     Get the list of all users from the panel API.
 
     Args:
-        panel_data (PanelCredentials): A PanelCredentials object containing
+        panel_data (PanelType): A PanelType object containing
         the username, password, and domain for the panel API.
 
     Returns:
@@ -98,12 +98,12 @@ async def all_user(panel_data: PanelCredentials) -> list[UserType] | ValueError:
     raise ValueError(message)
 
 
-async def enable_all_user(panel_data: PanelCredentials) -> None | ValueError:
+async def enable_all_user(panel_data: PanelType) -> None | ValueError:
     """
     Enable all users on the panel.
 
     Args:
-        panel_data (PanelCredentials): A PanelCredentials object containing
+        panel_data (PanelType): A PanelType object containing
         the username, password, and domain for the panel API.
 
     Returns:
@@ -148,13 +148,13 @@ async def enable_all_user(panel_data: PanelCredentials) -> None | ValueError:
 
 
 async def enable_selected_users(
-    panel_data: PanelCredentials, inactive_users: list[UserType]
+    panel_data: PanelType, inactive_users: list[UserType]
 ) -> None | ValueError:
     """
     Enable selected users on the panel.
 
     Args:
-        panel_data (PanelCredentials): A PanelCredentials object containing
+        panel_data (PanelType): A PanelType object containing
         the username, password, and domain for the panel API.
         inactive_users (list[user]): A list of user objects that are currently inactive.
 
@@ -197,14 +197,12 @@ async def enable_selected_users(
     logger.info("Enabled selected users")
 
 
-async def disable_user(
-    panel_data: PanelCredentials, username: UserType
-) -> None | ValueError:
+async def disable_user(panel_data: PanelType, username: UserType) -> None | ValueError:
     """
     Disable a user on the panel.
 
     Args:
-        panel_data (PanelCredentials): A PanelCredentials object containing
+        panel_data (PanelType): A PanelType object containing
         the username, password, and domain for the panel API.
         username (user): The username of the user to disable.
 
@@ -248,17 +246,17 @@ async def disable_user(
     raise ValueError(message)
 
 
-# from utils.types import PanelCredentials
+# from utils.types import PanelType
 # import httpx
 # import json
 
 
-async def get_nodes(panel_data: PanelCredentials) -> list[NodeType] | ValueError:
+async def get_nodes(panel_data: PanelType) -> list[NodeType] | ValueError:
     """
     Get the IDs of all nodes from the panel API.
 
     Args:
-        panel_data (PanelCredentials): A PanelCredentials object containing
+        panel_data (PanelType): A PanelType object containing
         the username, password, and domain for the panel API.
 
     Returns:
