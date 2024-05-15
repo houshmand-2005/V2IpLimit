@@ -6,6 +6,9 @@ import ipaddress
 import random
 import re
 
+from utils.check_usage import ACTIVE_USERS
+from utils.types import UserType
+
 try:
     import httpx
 except ImportError:
@@ -108,7 +111,7 @@ IP_V4_REGEX = re.compile(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})")
 EMAIL_REGEX = re.compile(r"email:\s*([A-Za-z0-9._%+-]+)")
 
 
-async def parse_logs(log: str) -> list[str, str, str]:
+async def parse_logs(log: str) -> list[UserType] | list:
     """
     Asynchronously parse logs to extract and validate IP addresses and emails.
 
@@ -116,12 +119,10 @@ async def parse_logs(log: str) -> list[str, str, str]:
         log (str): The log to parse.
 
     Returns:
-        list: A list of lists. Each inner list contains an email,
-        an IP address, and the type of the IP address (ipv4 or ipv6).
+        list[UserType]
     """
 
     lines = log.splitlines()
-    results = []
     for line in lines:
         if "accepted" not in line:
             continue
@@ -151,7 +152,14 @@ async def parse_logs(log: str) -> list[str, str, str]:
                 continue
         else:
             continue
-        temp_list = [email, ip, "ipv6"] if ip_v6_match else [email, ip, "ipv4"]
-        logger.info(temp_list)
-        results.append(temp_list)
-    return results
+
+        user = ACTIVE_USERS.get(email)
+        if user:
+            user.ip.append(ip)
+        else:
+            user = ACTIVE_USERS.setdefault(
+                email,
+                UserType(name=email, ip=[ip]),
+            )
+
+    return ACTIVE_USERS
