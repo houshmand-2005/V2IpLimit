@@ -5,6 +5,7 @@ This module contains functions to parse and validate logs.
 import ipaddress
 import random
 import re
+import sys
 
 from utils.check_usage import ACTIVE_USERS
 from utils.types import UserType
@@ -13,8 +14,7 @@ try:
     import httpx
 except ImportError:
     print("Module 'httpx' is not installed use: 'pip install httpx' to install it")
-
-from utils.logs import logger
+    sys.exit()
 
 INVALID_EMAILS = [
     "API]",
