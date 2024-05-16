@@ -2,15 +2,20 @@
 This module contains functions to interact with the panel API.
 """
 
+import asyncio
 from ssl import SSLError
+import sys
 
 try:
     import httpx
 except ImportError:
     print("Module 'httpx' is not installed use: 'pip install httpx' to install it")
-
+    sys.exit()
+from utils.handel_dis_users import DISABLED_USERS, DisabledUsers
 from utils.logs import logger
 from utils.types import NodeType, PanelType, UserType
+
+TIME_TO_ACTIVE_USERS = 10  # TODO:read this form config file
 
 
 async def get_token(panel_data: PanelType) -> PanelType | ValueError:
@@ -35,7 +40,7 @@ async def get_token(panel_data: PanelType) -> PanelType | ValueError:
         url = f"{scheme}://{panel_data.panel_domain}/api/admin/token"
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.post(url, data=payload, timeout=10)
+                response = await client.post(url, data=payload, timeout=5)
                 response.raise_for_status()
             json_obj = response.json()
             panel_data.panel_token = json_obj["access_token"]
@@ -137,7 +142,7 @@ async def enable_all_user(panel_data: PanelType) -> None | ValueError:
     if isinstance(users, ValueError):
         raise users
     for username in users:
-        for scheme in ["https", "http"]:
+        for scheme in ["https", "http"]:  # TODO:save what scheme is used
             url = f"{scheme}://{panel_data.panel_domain}/api/user/{username.name}"
             status = {"status": "active"}
             try:
@@ -161,7 +166,7 @@ async def enable_all_user(panel_data: PanelType) -> None | ValueError:
 
 
 async def enable_selected_users(
-    panel_data: PanelType, inactive_users: list[UserType]
+    panel_data: PanelType, inactive_users: set[str]
 ) -> None | ValueError:
     """
     Enable selected users on the panel.
@@ -169,7 +174,7 @@ async def enable_selected_users(
     Args:
         panel_data (PanelType): A PanelType object containing
         the username, password, and domain for the panel API.
-        inactive_users (list[user]): A list of user objects that are currently inactive.
+        inactive_users (set[str]): A list of user str that are currently inactive.
 
     Returns:
         None
@@ -187,13 +192,13 @@ async def enable_selected_users(
     }
     for username in inactive_users:
         for scheme in ["https", "http"]:
-            url = f"{scheme}://{panel_data.panel_domain}/api/user/{username.name}"
+            url = f"{scheme}://{panel_data.panel_domain}/api/user/{username}"
             status = {"status": "active"}
             try:
                 async with httpx.AsyncClient() as client:
                     response = await client.put(url, json=status, headers=headers)
                     response.raise_for_status()
-                logger.info("Enabled %s", username.name)
+                logger.info("Enabled %s", username)
                 break
             except SSLError:
                 continue
@@ -241,6 +246,8 @@ async def disable_user(panel_data: PanelType, username: UserType) -> None | Valu
                 response = await client.put(url, json=status, headers=headers)
                 response.raise_for_status()
             logger.info("Disabled user: %s", username.name)
+            dis_obj = DisabledUsers()
+            await dis_obj.add_user(username.name)
             return None
         except SSLError:
             continue
@@ -321,3 +328,15 @@ async def get_nodes(panel_data: PanelType) -> list[NodeType] | ValueError:
     )
     logger.error(message)
     raise ValueError(message)
+
+
+async def enable_dis_user(panel_data: PanelType):
+    """
+    Enable diabled users every 'TIME_TO_ACTIVE_USERS' seconds.
+    """
+    dis_obj = DisabledUsers()
+    while True:
+        await asyncio.sleep(TIME_TO_ACTIVE_USERS)
+        if DISABLED_USERS:
+            await enable_selected_users(panel_data, DISABLED_USERS)
+            await dis_obj.read_and_clear_users()
