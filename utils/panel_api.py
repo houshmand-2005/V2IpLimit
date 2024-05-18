@@ -3,8 +3,8 @@ This module contains functions to interact with the panel API.
 """
 
 import asyncio
-from ssl import SSLError
 import sys
+from ssl import SSLError
 
 try:
     import httpx
@@ -14,6 +14,7 @@ except ImportError:
 from utils.handel_dis_users import DISABLED_USERS, DisabledUsers
 from utils.logs import logger
 from utils.types import NodeType, PanelType, UserType
+from telegram_bot.send_message import send_logs
 
 TIME_TO_ACTIVE_USERS = 10  # TODO:read this form config file
 
@@ -46,22 +47,22 @@ async def get_token(panel_data: PanelType) -> PanelType | ValueError:
             panel_data.panel_token = json_obj["access_token"]
             return panel_data
         except httpx.HTTPStatusError:
-            logger.error(
-                "[%d] %s",
-                response.status_code,
-                response.text,
-            )
+            message = f"[{response.status_code}] {response.text}"
+            await send_logs(message)
+            logger.error(message)
             continue
         except SSLError:
             continue
         except Exception as error:  # pylint: disable=broad-except
-            logger.error("An unexpected error occurred: %s", error)
+            message = f"An unexpected error occurred: {error}"
+            await send_logs(message)
+            logger.error(message)
             continue
     message = (
         "Failed to get token. make sure the panel is running "
         + "and the username and password are correct."
     )
-
+    await send_logs(message)
     logger.error(message)
     raise ValueError(message)
 
@@ -99,19 +100,20 @@ async def all_user(panel_data: PanelType) -> list[UserType] | ValueError:
         except SSLError:
             continue
         except httpx.HTTPStatusError:
-            logger.error(
-                "[%d] %s",
-                response.status_code,
-                response.text,
-            )
+            message = f"[{response.status_code}] {response.text}"
+            await send_logs(message)
+            logger.error(message)
             continue
         except Exception as error:  # pylint: disable=broad-except
-            logger.error("An unexpected error occurred: %s", error)
+            message = f"An unexpected error occurred: {error}"
+            await send_logs(message)
+            logger.error(message)
             continue
     message = (
         "Failed to get users. make sure the panel is running "
         + "and the username and password are correct."
     )
+    await send_logs(message)
     logger.error(message)
     raise ValueError(message)
 
@@ -149,19 +151,21 @@ async def enable_all_user(panel_data: PanelType) -> None | ValueError:
                 async with httpx.AsyncClient() as client:
                     response = await client.put(url, json=status, headers=headers)
                     response.raise_for_status()
-                logger.info("Enabled user: %s", username.name)
+                message = f"Enabled user: {username.name}"
+                await send_logs(message)
+                logger.info(message)
                 break
             except SSLError:
                 continue
             except httpx.HTTPStatusError:
-                logger.error(
-                    "[%d] %s",
-                    response.status_code,
-                    response.text,
-                )
+                message = f"[{response.status_code}] {response.text}"
+                await send_logs(message)
+                logger.error(message)
                 continue
             except Exception as error:  # pylint: disable=broad-except
-                logger.error("An unexpected error occurred: %s", error)
+                message = f"An unexpected error occurred: {error}"
+                await send_logs(message)
+                logger.error(message)
     logger.info("Enabled all users")
 
 
@@ -198,19 +202,21 @@ async def enable_selected_users(
                 async with httpx.AsyncClient() as client:
                     response = await client.put(url, json=status, headers=headers)
                     response.raise_for_status()
-                logger.info("Enabled %s", username)
+                message = f"Enabled user: {username}"
+                await send_logs(message)
+                logger.info(message)
                 break
             except SSLError:
                 continue
             except httpx.HTTPStatusError:
-                logger.error(
-                    "[%d] %s",
-                    response.status_code,
-                    response.text,
-                )
+                message = f"[{response.status_code}] {response.text}"
+                await send_logs(message)
+                logger.error(message)
                 continue
             except Exception as error:  # pylint: disable=broad-except
-                logger.error("An unexpected error occurred: %s", error)
+                message = f"An unexpected error occurred: {error}"
+                await send_logs(message)
+                logger.error(message)
                 continue
     logger.info("Enabled selected users")
 
@@ -245,26 +251,29 @@ async def disable_user(panel_data: PanelType, username: UserType) -> None | Valu
             async with httpx.AsyncClient() as client:
                 response = await client.put(url, json=status, headers=headers)
                 response.raise_for_status()
-            logger.info("Disabled user: %s", username.name)
+            message = f"Disabled user: {username.name}"
+            await send_logs(message)
+            logger.info(message)
             dis_obj = DisabledUsers()
             await dis_obj.add_user(username.name)
             return None
         except SSLError:
             continue
         except httpx.HTTPStatusError:
-            logger.error(
-                "[%d] %s",
-                response.status_code,
-                response.text,
-            )
+            message = f"[{response.status_code}] {response.text}"
+            await send_logs(message)
+            logger.error(message)
             continue
         except Exception as error:  # pylint: disable=broad-except
-            logger.error("An unexpected error occurred: %s", error)
+            message = f"An unexpected error occurred: {error}"
+            await send_logs(message)
+            logger.error(message)
             continue
     message = (
         f"Failed to disable user: {username.name}. Make sure the panel is running "
         + "and the username and password are correct."
     )
+    await send_logs(message)
     logger.error(message)
     raise ValueError(message)
 
@@ -313,26 +322,27 @@ async def get_nodes(panel_data: PanelType) -> list[NodeType] | ValueError:
         except SSLError:
             continue
         except httpx.HTTPStatusError:
-            logger.error(
-                "[%d] %s",
-                response.status_code,
-                response.text,
-            )
+            message = f"[{response.status_code}] {response.text}"
+            await send_logs(message)
+            logger.error(message)
             continue
         except Exception as error:  # pylint: disable=broad-except
-            logger.error("An unexpected error occurred: %s", error)
+            message = f"An unexpected error occurred: {error}"
+            await send_logs(message)
+            logger.error(message)
             continue
     message = (
         "Failed to get nodes. make sure the panel is running "
         + "and the username and password are correct."
     )
+    await send_logs(message)
     logger.error(message)
     raise ValueError(message)
 
 
 async def enable_dis_user(panel_data: PanelType):
     """
-    Enable diabled users every 'TIME_TO_ACTIVE_USERS' seconds.
+    Enable disabled users every 'TIME_TO_ACTIVE_USERS' seconds.
     """
     dis_obj = DisabledUsers()
     while True:
