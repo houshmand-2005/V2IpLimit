@@ -2,7 +2,8 @@
 This module contains the data classes used in the application.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import Enum
 
 
 @dataclass
@@ -43,15 +44,30 @@ class NodeType:
     message: str | None = None
 
 
+class UserStatus(Enum):
+    """
+    Enum representing the type of UserStatus.
+
+    Attributes:
+        ACTIVE (str)
+        DISABLE (str)
+    """
+
+    ACTIVE = "ACTIVE"
+    DISABLE = "DISABLE"
+
+
 @dataclass
 class UserType:
     """
     Represents a user type.
 
     Attributes:
-        name (str): The name of the user type.
-        status (str | None): The status of the user type. None if no status is provided.
+        name (str): The name of the user.
+        status (str | None): The status of the user. None if no status is provided.
+        ip (list[str] | list): List of IP address of the user.
     """
 
     name: str
-    status: str | None = None
+    status: UserStatus | None = None
+    ip: list[str] | list = field(default_factory=list)
