@@ -17,3 +17,5 @@ async def send_logs(msg):
                 )
             except Exception as e:  # pylint: disable=broad-except
                 print(f"Failed to send message to admin {admin}: {e}")
+    else:
+        print("No admins found.")

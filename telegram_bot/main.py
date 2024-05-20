@@ -4,27 +4,44 @@ It includes functions for adding admins,
 listing admins, setting special limits, and creating a config and more...
 """
 
+import asyncio
 import os
+import sys
 
-from telegram import Update
-from telegram.ext import (
-    ApplicationBuilder,
-    CommandHandler,
-    ContextTypes,
-    ConversationHandler,
-    MessageHandler,
-    filters,
-)
+try:
+    from telegram import Update
+    from telegram.ext import (
+        ApplicationBuilder,
+        CommandHandler,
+        ContextTypes,
+        ConversationHandler,
+        MessageHandler,
+        filters,
+    )
+except ImportError:
+    print(
+        "Module 'python-telegram-bot' is not installed use:"
+        + " 'pip install python-telegram-bot' to install it"
+    )
+    sys.exit()
 
 from telegram_bot.utils import (
     add_admin_to_config,
     add_base_information,
+    add_except_user,
     check_admin,
     get_special_limit_list,
     handel_special_limit,
     read_json_file,
     remove_admin_from_config,
+    remove_except_user_from_config,
+    save_check_interval,
+    save_general_limit,
+    save_time_to_active_users,
+    show_except_users_handler,
+    write_country_code_json,
 )
+from utils.read_config import read_config
 
 (
     GET_DOMAIN,
@@ -36,26 +53,55 @@ from telegram_bot.utils import (
     GET_SPECIAL_LIMIT,
     GET_LIMIT_NUMBER,
     GET_CHAT_ID_TO_REMOVE,
-) = range(9)
+    SET_COUNTRY_CODE,
+    SET_EXCEPT_USERS,
+    REMOVE_EXCEPT_USER,
+    GET_GENERAL_LIMIT_NUMBER,
+    GET_CHECK_INTERVAL,
+    GET_TIME_TO_ACTIVE_USERS,
+) = range(15)
 
-application = (
-    ApplicationBuilder().token("").build()
-)
+data = asyncio.run(read_config())
+try:
+    bot_token = data["BOT_TOKEN"]
+except KeyError as exc:
+    raise ValueError("BOT_TOKEN is missing in the config file.") from exc
+application = ApplicationBuilder().token(bot_token).build()
+
+
+START_MESSAGE = """
+✨<b>Commands List:</b>\n<b>/start</b> \n<code>start the bot</code>
+<b>/create_config</b>
+<code>Config panel information (username, password, ...)</code>
+<b>/set_special_limit</b>
+<code>set each user ip limit like: test_user limit: 5 ips</code>
+<b>/show_special_limit</b> \n<code>show special limit list</code>
+<b>/add_admin</b><code>
+Giving access to another chat ID and creating a new admin for the bot</code>
+<b>/admins_list</b>\n<code>Show the list of active bot admins</code>
+<b>/remove_admin</b>\n<code>An admin's access will be removed from this bot</code>
+<b>/country_code</b>\n<code>Set your country, Only IPs related to that country
+are counted (to increase accuracy)</code>
+<b>/set_except_user</b>\n<code>Set a user to except list</code>
+<b>/remove_except_user</b>\n<code>Remove a user from except list</code>
+<b>/show_except_users</b>\n<code>Show the list of except users</code>
+<b>/set_general_limit_number</b>\n<code>Set the general limit number
+(if user not in special limit list then this is they limit number)</code>
+<b>/set_check_interval</b>\n<code>Set the check interval time </code>
+<b>/set_time_to_active_users</b>\n<code>Set the time to active users</code>
+<b>/backup</b> \n<code>Sends 'config.json' file</code>"""
 
 
 async def send_logs(msg):
     """Send logs to all admins."""
-    print("Here!")
     admins = await check_admin()
-    print(admins)
     for admin in admins:
-        print(admin, msg)
         try:
             await application.bot.sendMessage(
                 chat_id=admin, text=msg, parse_mode="HTML"
             )
-        except Exception as e:
-            print(f"Failed to send message to admin {admin}: {e}")
+        except Exception as error:  # pylint: disable=broad-except
+            print(f"Failed to send message to admin {admin}: {error}")
 
 
 async def add_admin(update: Update, _context: ContextTypes.DEFAULT_TYPE):
@@ -109,7 +155,7 @@ async def admins_list(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     admins = await check_admin()
     if admins:
         admins_str = "\n- ".join(map(str, admins))
-        await update.message.reply_html(text=f"Admins: \n-{admins_str}")
+        await update.message.reply_html(text=f"Admins: \n- {admins_str}")
     else:
         await update.message.reply_html(text="No admins found!")
     return ConversationHandler.END
@@ -186,18 +232,7 @@ async def start(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     check = await check_admin_privilege(update)
     if check:
         return check
-    await update.message.reply_html(
-        text="Command List:\n<b>/start</b> \n<code>start the bot</code>\n"
-        + "<b>/create_config</b> \n"
-        + "<code>Config panel information (username, password, ...)</code>\n"
-        + "<b>/set_special_limit</b> \n<code>set each"
-        + " user ip limit like: test_user limit: 5 ips</code>"
-        + "\n<b>/show_special_limit</b> \n<code>show special limit list</code>"
-        + "\n<b>/add_admin</b>\n<code>"
-        + "Giving access to another chat ID and creating a new admin for the bot</code>"
-        + "\n<b>/admins_list</b>\n<code>Show the list of active bot admins</code>"
-        + "\n<b>/remove_admin</b>\n<code>An admin's access will be removed from this bot</code>"
-    )
+    await update.message.reply_html(text=START_MESSAGE)
 
 
 async def create_config(update: Update, _context: ContextTypes.DEFAULT_TYPE):
@@ -208,19 +243,24 @@ async def create_config(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     if check:
         return check
     if os.path.exists("config.json"):
-        await update.message.reply_html(text="You set configuration before!")
-        data = await read_json_file()
-        domain = data.get("PANEL_DOMAIN", "Not set")
-        username = data.get("PANEL_USERNAME", "Not set")
-        password = data.get("PANEL_PASSWORD", "Not set")
-        await update.message.reply_html(
-            text="<b>Current configuration:</b>\n"
-            + f"Domain: <code>{domain}</code>\n"
-            + f"Username: <code>{username}</code>\n"
-            + f"Password: <code>{password}</code>\n"
-            + "Do you want to change these settings? <code>(yes/no)</code>"
-        )
-        return GET_CONFIRMATION
+        json_data = await read_json_file()
+        domain = json_data.get("PANEL_DOMAIN")
+        username = json_data.get("PANEL_USERNAME")
+        password = json_data.get("PANEL_PASSWORD")
+        if domain and username and password:
+            await update.message.reply_html(text="You set configuration before!")
+            await update.message.reply_html(
+                text="After changing the configuration, you need to <b>restart</b> the bot.\n"
+                + "Only this command needs restart other commands <b>don't need it.</b>"
+            )
+            await update.message.reply_html(
+                text="<b>Current configuration:</b>\n"
+                + f"Domain: <code>{domain}</code>\n"
+                + f"Username: <code>{username}</code>\n"
+                + f"Password: <code>{password}</code>\n"
+                + "Do you want to change these settings? <code>(yes/no)</code>"
+            )
+            return GET_CONFIRMATION
     await update.message.reply_html(
         text="So now give me your <b>panel address!</b>\n"
         + "Send The Domain or Ip with Port\n"
@@ -234,7 +274,7 @@ async def get_confirmation(update: Update, _context: ContextTypes.DEFAULT_TYPE) 
     """
     Get confirmation for change panel information.
     """
-    if update.message.text.lower() == "yes" or update.message.text.lower() == "y":
+    if update.message.text.lower() in ["yes", "y"]:
         await update.message.reply_html(
             text="So now give me your <b>panel address!</b>\n"
             + "Send The Domain or Ip with Port\n"
@@ -242,6 +282,10 @@ async def get_confirmation(update: Update, _context: ContextTypes.DEFAULT_TYPE) 
             + "<b>without</b> <code>https://</code> or <code>http://</code> or anything else",
         )
         return GET_DOMAIN
+    await update.message.reply_html(
+        text=f"<code>{update.message.text}</code> received.\n"
+        "Use <b>/create_config</b> when you change your mind."
+    )
     return ConversationHandler.END
 
 
@@ -250,7 +294,7 @@ async def get_domain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     context.user_data["domain"] = update.message.text.strip()
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="Send Your Username: ",
+        text="Send Your Username: (For example: 'admin')",
     )
     return GET_USERNAME
 
@@ -260,7 +304,7 @@ async def get_username(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     context.user_data["username"] = update.message.text.strip()
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="Send Your Password: ",
+        text="Send Your Password: (For example: 'admin1234')",
     )
     return GET_PASSWORD
 
@@ -333,77 +377,340 @@ async def get_chat_id_to_remove(update: Update, _context: ContextTypes.DEFAULT_T
     return ConversationHandler.END
 
 
-start_handler = CommandHandler("start", start)
-application.add_handler(start_handler)
-upload_handler = ConversationHandler(
-    entry_points=[CommandHandler("create_config", create_config)],
-    states={
-        GET_CONFIRMATION: [MessageHandler(filters.TEXT, get_confirmation)],
-        GET_DOMAIN: [MessageHandler(filters.TEXT, get_domain)],
-        GET_USERNAME: [MessageHandler(filters.TEXT, get_username)],
-        GET_PASSWORD: [MessageHandler(filters.TEXT, get_password)],
-    },
-    fallbacks=[],
-)
-application.add_handler(upload_handler)
-special_limit_handler = ConversationHandler(
-    entry_points=[
-        CommandHandler("set_special_limit", set_special_limit),
-    ],
-    states={
-        GET_SPECIAL_LIMIT: [MessageHandler(filters.TEXT, get_special_limit)],
-        GET_LIMIT_NUMBER: [MessageHandler(filters.TEXT, get_limit_number)],
-    },
-    fallbacks=[],
-)
-application.add_handler(upload_handler)
-
-application.add_handler(special_limit_handler)
-
-
 async def show_special_limit_function(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ):
     """Show special limit list for all users."""
+    check = await check_admin_privilege(update)
+    if check:
+        return check
     out_put = await get_special_limit_list()
-    for user in out_put:
-        await update.message.reply_html(text=f"{user}")
+    if out_put:
+        for user in out_put:
+            await update.message.reply_html(text=user)
 
 
-show_special_limit_handler = ConversationHandler(
-    entry_points=[
-        CommandHandler("show_special_limit", show_special_limit_function),
-    ],
-    states={},
-    fallbacks=[],
+async def set_country_code(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    check = await check_admin_privilege(update)
+    if check:
+        return check
+    await update.message.reply_html(
+        "1. <code>IR</code> (Iran)\n"
+        + "2. <code>RU</code> (Russia)\n"
+        + "3. <code>CN</code> (China)\n"
+        + "4. <code>None</code>, don't check the location\n"
+        + "<b>just send the number of the country code like: <code>2</code> or <code>1</code></b>"
+    )
+    return SET_COUNTRY_CODE
+
+
+async def write_country_code(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    """Write the country code to the config file."""
+    country_code = update.message.text.strip()
+    country_codes = {"1": "IR", "2": "RU", "3": "CN", "4": "None"}
+    selected_country = country_codes.get(country_code, "None")
+    await update.message.reply_html(
+        f"Country code <code>{selected_country}</code> set successfully!"
+    )
+    await write_country_code_json(selected_country)
+    return ConversationHandler.END
+
+
+async def send_backup(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    """Send the backup file to the user."""
+    check = await check_admin_privilege(update)
+    if check:
+        return check
+    await update.message.reply_document(
+        document=open("config.json", "r", encoding="utf8"),  # pylint: disable=consider-using-with
+        caption="Here is the backup file!",
+    )
+
+
+async def set_except_users(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    check = await check_admin_privilege(update)
+    if check:
+        return check
+    await update.message.reply_html(
+        "Send the except (<code>users in this list have no limitation</code>) user:"
+    )
+    return SET_EXCEPT_USERS
+
+
+async def set_except_users_handler(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    except_user = update.message.text.strip()
+    await add_except_user(except_user)
+    await update.message.reply_html(
+        f"Except user <code>{except_user}</code> added successfully!"
+    )
+    return ConversationHandler.END
+
+
+async def remove_except_user(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    check = await check_admin_privilege(update)
+    if check:
+        return check
+    await update.message.reply_html("Send the except user to remove:")
+    return REMOVE_EXCEPT_USER
+
+
+async def remove_except_user_handler(
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
+):
+    except_user = await remove_except_user_from_config(update.message.text.strip())
+    if except_user:
+        await update.message.reply_html(
+            f"Except user <code>{except_user}</code> removed successfully!"
+        )
+
+    else:
+        await update.message.reply_html(
+            f"Except user <code>{except_user}</code> not found!"
+        )
+    return ConversationHandler.END
+
+
+async def show_except_users(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    check = await check_admin_privilege(update)
+    if check:
+        return check
+    messages = await show_except_users_handler()
+    if messages:
+        for message in messages:
+            await update.message.reply_html(text=message)
+    else:
+        await update.message.reply_html(text="No except user found!")
+    return ConversationHandler.END
+
+
+async def get_general_limit_number(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    check = await check_admin_privilege(update)
+    if check:
+        return check
+    await update.message.reply_text("Please send the general limit number:")
+    return GET_GENERAL_LIMIT_NUMBER
+
+
+async def get_general_limit_number_handler(
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
+):
+    try:
+        limit_number = int(update.message.text.strip())
+    except ValueError:
+        await update.message.reply_html(
+            text=f"Wrong input: <code>{update.message.text.strip()}"
+            + "</code>\ntry again <b>/set_general_limit_number</b>"
+        )
+        return ConversationHandler.END
+    await save_general_limit(limit_number)
+    await update.message.reply_text(f"General LIMIT_NUMBER set to {limit_number}")
+    return ConversationHandler.END
+
+
+async def get_check_interval(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    """get the 'check_interval' variable that handel how often the bot check the users"""
+    check = await check_admin_privilege(update)
+    if check:
+        return check
+    await update.message.reply_text(
+        "Please send the check interval time like 210 (its recommended to set it to 240 seconds)"
+    )
+    return GET_CHECK_INTERVAL
+
+
+async def get_check_interval_handler(
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
+):
+    """save the 'check_interval' variable"""
+    try:
+        check_interval = int(update.message.text.strip())
+    except ValueError:
+        await update.message.reply_html(
+            text=f"Wrong input: <code>{update.message.text.strip()}"
+            + "</code>\ntry again <b>/set_check_interval</b>"
+        )
+        return ConversationHandler.END
+    await save_check_interval(check_interval)
+    await update.message.reply_text(f"CHECK_INTERVAL set to {check_interval}")
+    return ConversationHandler.END
+
+
+async def get_time_to_active_users(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    """get the 'time_to_active' variable that handel how long user be not be active"""
+    check = await check_admin_privilege(update)
+    if check:
+        return check
+    await update.message.reply_text(
+        "Please send the time to active users: like 600 (its in seconds)"
+    )
+    return GET_TIME_TO_ACTIVE_USERS
+
+
+async def get_time_to_active_users_handler(
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
+):
+    """save the 'time_to_active' variable"""
+    try:
+        time_to_active_users = int(update.message.text.strip())
+    except ValueError:
+        await update.message.reply_html(
+            text=f"Wrong input: <code>{update.message.text.strip()}"
+            + "</code>\ntry again <b>/set_time_to_active_users</b>"
+        )
+        return ConversationHandler.END
+    await save_time_to_active_users(time_to_active_users)
+    await update.message.reply_text(
+        f"TIME_TO_ACTIVE_USERS set to {time_to_active_users}"
+    )
+    return ConversationHandler.END
+
+
+application.add_handler(CommandHandler("start", start))
+application.add_handler(
+    ConversationHandler(
+        entry_points=[CommandHandler("create_config", create_config)],
+        states={
+            GET_CONFIRMATION: [MessageHandler(filters.TEXT, get_confirmation)],
+            GET_DOMAIN: [MessageHandler(filters.TEXT, get_domain)],
+            GET_USERNAME: [MessageHandler(filters.TEXT, get_username)],
+            GET_PASSWORD: [MessageHandler(filters.TEXT, get_password)],
+        },
+        fallbacks=[],
+    )
 )
-application.add_handler(show_special_limit_handler)
-add_admin_handler = ConversationHandler(
-    entry_points=[
-        CommandHandler("add_admin", add_admin),
-    ],
-    states={
-        GET_CHAT_ID: [MessageHandler(filters.TEXT, get_chat_id)],
-    },
-    fallbacks=[],
+application.add_handler(
+    ConversationHandler(
+        entry_points=[
+            CommandHandler("set_special_limit", set_special_limit),
+        ],
+        states={
+            GET_SPECIAL_LIMIT: [MessageHandler(filters.TEXT, get_special_limit)],
+            GET_LIMIT_NUMBER: [MessageHandler(filters.TEXT, get_limit_number)],
+        },
+        fallbacks=[],
+    )
 )
-list_admins_handler = CommandHandler("admins_list", admins_list)
-
-application.add_handler(add_admin_handler)
-application.add_handler(list_admins_handler)
-
-remove_admin_handler = ConversationHandler(
-    entry_points=[
-        CommandHandler("remove_admin", remove_admin),
-    ],
-    states={
-        GET_CHAT_ID_TO_REMOVE: [MessageHandler(filters.TEXT, get_chat_id_to_remove)],
-    },
-    fallbacks=[],
+application.add_handler(
+    ConversationHandler(
+        entry_points=[
+            CommandHandler("set_time_to_active_users", get_time_to_active_users),
+        ],
+        states={
+            GET_TIME_TO_ACTIVE_USERS: [
+                MessageHandler(filters.TEXT, get_time_to_active_users_handler)
+            ],
+        },
+        fallbacks=[],
+    )
 )
-application.add_handler(remove_admin_handler)
+application.add_handler(
+    ConversationHandler(
+        entry_points=[
+            CommandHandler("set_check_interval", get_check_interval),
+        ],
+        states={
+            GET_CHECK_INTERVAL: [
+                MessageHandler(filters.TEXT, get_check_interval_handler)
+            ],
+        },
+        fallbacks=[],
+    )
+)
+application.add_handler(
+    ConversationHandler(
+        entry_points=[
+            CommandHandler("set_general_limit_number", get_general_limit_number),
+        ],
+        states={
+            GET_GENERAL_LIMIT_NUMBER: [
+                MessageHandler(filters.TEXT, get_general_limit_number_handler)
+            ],
+        },
+        fallbacks=[],
+    )
+)
+application.add_handler(
+    ConversationHandler(
+        entry_points=[
+            CommandHandler("remove_except_user", remove_except_user),
+        ],
+        states={
+            REMOVE_EXCEPT_USER: [
+                MessageHandler(filters.TEXT, remove_except_user_handler)
+            ],
+        },
+        fallbacks=[],
+    )
+)
 
+application.add_handler(
+    ConversationHandler(
+        entry_points=[
+            CommandHandler("country_code", set_country_code),
+        ],
+        states={
+            SET_COUNTRY_CODE: [MessageHandler(filters.TEXT, write_country_code)],
+        },
+        fallbacks=[],
+    )
+)
+application.add_handler(
+    ConversationHandler(
+        entry_points=[
+            CommandHandler("set_except_user", set_except_users),
+        ],
+        states={
+            SET_EXCEPT_USERS: [MessageHandler(filters.TEXT, set_except_users_handler)],
+        },
+        fallbacks=[],
+    )
+)
 
-def run_telegram_bot():
-    """Run the telegram bot"""
-    application.run_polling()
+application.add_handler(
+    ConversationHandler(
+        entry_points=[
+            CommandHandler("show_special_limit", show_special_limit_function),
+        ],
+        states={},
+        fallbacks=[],
+    )
+)
+application.add_handler(
+    ConversationHandler(
+        entry_points=[
+            CommandHandler("add_admin", add_admin),
+        ],
+        states={
+            GET_CHAT_ID: [MessageHandler(filters.TEXT, get_chat_id)],
+        },
+        fallbacks=[],
+    )
+)
+application.add_handler(
+    ConversationHandler(
+        entry_points=[
+            CommandHandler("remove_admin", remove_admin),
+        ],
+        states={
+            GET_CHAT_ID_TO_REMOVE: [
+                MessageHandler(filters.TEXT, get_chat_id_to_remove)
+            ],
+        },
+        fallbacks=[],
+    )
+)
+application.add_handler(
+    ConversationHandler(
+        entry_points=[
+            CommandHandler("backup", send_backup),
+        ],
+        states={},
+        fallbacks=[],
+    )
+)
+application.add_handler(CommandHandler("admins_list", admins_list))
+application.add_handler(CommandHandler("show_except_users", show_except_users))
+unknown_handler = MessageHandler(filters.TEXT, start)
+application.add_handler(unknown_handler)
+unknown_handler_command = MessageHandler(filters.COMMAND, start)
+application.add_handler(unknown_handler_command)
