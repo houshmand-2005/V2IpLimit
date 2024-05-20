@@ -12,10 +12,10 @@ download_program() {
     local filename
 
     if [ "$architecture" == "x86_64" ]; then
-        url=""
+        url="https://github.com/houshmand-2005/V2IpLimit/releases/download/1.0.0/v2iplimit_amd64_linux.bin"
         filename="v2iplimit_amd64.bin"
     elif [ "$architecture" == "aarch64" ]; then
-        url=""
+        url="https://github.com/houshmand-2005/V2IpLimit/releases/download/1.0.0/v2iplimit_arm64_linux.bin"
         filename="v2iplimit_arm64.bin"
     else
         echo "Unsupported architecture: $architecture"
