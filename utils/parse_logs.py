@@ -8,6 +8,7 @@ import re
 import sys
 
 from utils.check_usage import ACTIVE_USERS
+from utils.read_config import read_config
 from utils.types import UserType
 
 try:
@@ -27,13 +28,7 @@ INVALID_EMAILS = [
     "request",
 ]
 INVALID_IPS = ["1.1.1.1", "8.8.8.8", "0.0.0.0"]
-IP_LOCATION = []
 VALID_IPS = []
-IP_LOCATION = "IR"
-
-# TODO: add nodes ip and panel ip to the invalid ips
-# TODO: check ip v6 to match location too!
-
 CACHE = {}
 
 API_ENDPOINTS = {
@@ -111,7 +106,7 @@ IP_V4_REGEX = re.compile(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})")
 EMAIL_REGEX = re.compile(r"email:\s*([A-Za-z0-9._%+-]+)")
 
 
-async def parse_logs(log: str) -> list[UserType] | list:
+async def parse_logs(log: str) -> dict[str, UserType] | dict:  # pylint: disable=too-many-branches
     """
     Asynchronously parse logs to extract and validate IP addresses and emails.
 
@@ -121,7 +116,7 @@ async def parse_logs(log: str) -> list[UserType] | list:
     Returns:
         list[UserType]
     """
-
+    data = await read_config()
     lines = log.splitlines()
     for line in lines:
         if "accepted" not in line:
@@ -139,12 +134,15 @@ async def parse_logs(log: str) -> list[UserType] | list:
             continue
         is_valid_ip_test = await is_valid_ip(ip)
         if is_valid_ip_test:
-            country = await check_ip(ip)
-            if country and country == IP_LOCATION:
-                VALID_IPS.append(country)
-            elif country and country != IP_LOCATION:
-                INVALID_IPS.append(ip)
-                continue
+            if data["IP_LOCATION"] != "None":
+                country = await check_ip(ip)
+                if country and country == data["IP_LOCATION"]:
+                    VALID_IPS.append(country)
+                elif country and country != data["IP_LOCATION"]:
+                    INVALID_IPS.append(ip)
+                    continue
+        else:
+            continue
         if email_match:
             email = email_match.group(1)
             email = await remove_id_from_username(email)
