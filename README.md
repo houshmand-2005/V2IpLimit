@@ -5,14 +5,9 @@
 <hr>
 
 <b>Limiting the number of active users with IP</b><sub> (with xray logs)</sub>
-<br>Currently only tested with
-<br>[Marzban](https://github.com/Gozargah/Marzban) And [V2RayGen](https://github.com/SonyaCore/V2RayGen)
 
 <b>
-
-[Go to Marzban Version](Marzban/README.md) ♦️
-[Go to V2RayGen Version](V2RayGen/README.md)
-
+This version is still in develop So if you have any problem or suggestion, please open an issue.
 </b>
 
 <hr>
