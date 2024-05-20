@@ -11,12 +11,11 @@ try:
 except ImportError:
     print("Module 'httpx' is not installed use: 'pip install httpx' to install it")
     sys.exit()
+from telegram_bot.send_message import send_logs
 from utils.handel_dis_users import DISABLED_USERS, DisabledUsers
 from utils.logs import logger
+from utils.read_config import read_config
 from utils.types import NodeType, PanelType, UserType
-from telegram_bot.send_message import send_logs
-
-TIME_TO_ACTIVE_USERS = 10  # TODO:read this form config file
 
 
 async def get_token(panel_data: PanelType) -> PanelType | ValueError:
@@ -346,7 +345,8 @@ async def enable_dis_user(panel_data: PanelType):
     """
     dis_obj = DisabledUsers()
     while True:
-        await asyncio.sleep(TIME_TO_ACTIVE_USERS)
+        data = await read_config()
+        await asyncio.sleep(int(data["TIME_TO_ACTIVE_USERS"]))
         if DISABLED_USERS:
             await enable_selected_users(panel_data, DISABLED_USERS)
             await dis_obj.read_and_clear_users()
