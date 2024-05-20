@@ -12,6 +12,14 @@ This version is still in develop So if you have any problem or suggestion, pleas
 
 <hr>
 
+you can install it with:
+```bash
+bash <(curl -sSL https://houshmand-2005.github.io/v2iplimit.sh)
+```
+
+More details and information coming soon...
+<hr>
+
 ### Donation
 
 </center>
