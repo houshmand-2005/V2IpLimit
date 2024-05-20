@@ -31,7 +31,7 @@ class DisabledUsers:
                     return set(data.get("disable_user", []))
             else:
                 return set()
-        except Exception as error:
+        except Exception as error:  # pylint: disable=broad-except
             logger.error(error)
             print("Check the error or delete the file :", error)
             print("Delete the .disable_users.json file? (y/n)")
@@ -66,4 +66,4 @@ class DisabledUsers:
         self.disabled_users.clear()
         DISABLED_USERS.clear()
         await self.save_disabled_users()
-        return disabled_users
+        return set(disabled_users)
