@@ -17,7 +17,7 @@ except ImportError:
     )
     sys.exit()
 from telegram_bot.send_message import send_logs
-from utils.logs import logger
+from utils.logs import logger  # pylint: disable=ungrouped-imports
 from utils.panel_api import get_nodes, get_token
 from utils.parse_logs import parse_logs
 from utils.types import NodeType, PanelType
@@ -44,7 +44,8 @@ async def get_panel_logs(panel_data: PanelType) -> None:
         while True:
             try:
                 async with websockets.client.connect(
-                    f"{scheme}://{panel_data.panel_domain}/api/core/logs?interval={INTERVAL}&token={token}"
+                    f"{scheme}://{panel_data.panel_domain}/api/core"
+                    + f"/logs?interval={INTERVAL}&token={token}"
                 ) as ws:
                     log_message = "Establishing connection for the main panel"
                     await send_logs(log_message)

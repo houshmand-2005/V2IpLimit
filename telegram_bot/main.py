@@ -391,6 +391,7 @@ async def show_special_limit_function(
 
 
 async def set_country_code(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    """Set the country code for the bot."""
     check = await check_admin_privilege(update)
     if check:
         return check
@@ -428,6 +429,7 @@ async def send_backup(update: Update, _context: ContextTypes.DEFAULT_TYPE):
 
 
 async def set_except_users(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    """Set the except users for the bot."""
     check = await check_admin_privilege(update)
     if check:
         return check
@@ -438,6 +440,7 @@ async def set_except_users(update: Update, _context: ContextTypes.DEFAULT_TYPE):
 
 
 async def set_except_users_handler(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    """Write the except users to the config file."""
     except_user = update.message.text.strip()
     await add_except_user(except_user)
     await update.message.reply_html(
@@ -447,6 +450,7 @@ async def set_except_users_handler(update: Update, _context: ContextTypes.DEFAUL
 
 
 async def remove_except_user(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    """remove the except users for the bot."""
     check = await check_admin_privilege(update)
     if check:
         return check
@@ -457,6 +461,7 @@ async def remove_except_user(update: Update, _context: ContextTypes.DEFAULT_TYPE
 async def remove_except_user_handler(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ):
+    """remove the except users from the config file."""
     except_user = await remove_except_user_from_config(update.message.text.strip())
     if except_user:
         await update.message.reply_html(
@@ -471,6 +476,7 @@ async def remove_except_user_handler(
 
 
 async def show_except_users(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    """Show the except users for the bot."""
     check = await check_admin_privilege(update)
     if check:
         return check
@@ -484,6 +490,7 @@ async def show_except_users(update: Update, _context: ContextTypes.DEFAULT_TYPE)
 
 
 async def get_general_limit_number(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    """Get the general limit number for the bot."""
     check = await check_admin_privilege(update)
     if check:
         return check
@@ -494,6 +501,7 @@ async def get_general_limit_number(update: Update, _context: ContextTypes.DEFAUL
 async def get_general_limit_number_handler(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ):
+    """Write the general limit number to the config file."""
     try:
         limit_number = int(update.message.text.strip())
     except ValueError:

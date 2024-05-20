@@ -168,6 +168,7 @@ async def main():  # pylint: disable=too-many-statements
                 await create_node_task(panel_data, tg, node)
                 await asyncio.sleep(2)
             await asyncio.sleep(20)
+            # pylint: disable=duplicate-code
             print("Start 'check_and_add_new_nodes' Task Test: ")
             tg.create_task(
                 check_and_add_new_nodes(panel_data, tg, nodes_list),

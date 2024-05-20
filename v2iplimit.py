@@ -96,4 +96,9 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    while True:
+        try:
+            asyncio.run(main())
+        except Exception as er:  # pylint: disable=broad-except
+            logger.error(er)
+            asyncio.sleep(10)

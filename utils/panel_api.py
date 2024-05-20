@@ -143,7 +143,7 @@ async def enable_all_user(panel_data: PanelType) -> None | ValueError:
     if isinstance(users, ValueError):
         raise users
     for username in users:
-        for scheme in ["https", "http"]:  # TODO:save what scheme is used
+        for scheme in ["https", "http"]:  # add this later: save what scheme is used
             url = f"{scheme}://{panel_data.panel_domain}/api/user/{username.name}"
             status = {"status": "active"}
             try:
