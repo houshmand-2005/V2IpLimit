@@ -1,3 +1,5 @@
+# This version would be deprecated soon please switch to another xray user manager like Marzban
+
 # V2IpLimit
 
 Limiting the number of active users with IP

@@ -5,6 +5,15 @@ Limiting the number of active users with IP
 <br>
 Supports both IPv4 and IPv6.It also supports Marzban-node<br>
 
+<hr>
+
+# ⭐Try the new release
+
+You can check it out: (still in beta)<br>
+**https://github.com/houshmand-2005/V2IpLimit/tree/dev**
+
+<hr>
+
 ## Table of Contents
 
 - [Installation](#installation)
