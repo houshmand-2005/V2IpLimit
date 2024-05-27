@@ -24,6 +24,7 @@ from utils.types import NodeType, PanelType
 
 TASKS = []
 INTERVAL = "0.7"
+task_node_mapping = {}
 
 
 async def get_panel_logs(panel_data: PanelType) -> None:
@@ -97,12 +98,12 @@ async def get_nodes_logs(panel_data: PanelType, node: NodeType) -> None:
                         await parse_logs(str(new_log))
             except SSLError:
                 break
-            except Exception:  # pylint: disable=broad-except
+            except Exception as error:  # pylint: disable=broad-except
                 log_message = (
                     f"Failed to connect to this node [node id: {node.node_id}]"
                     + f" [node name: {node.node_name}]"
-                    + f" [node ip: {node.node_ip}] [node status: {node.status}]"
-                    + f" [node message: {node.message}] trying to connect 10 second later!"
+                    + f" [node ip: {node.node_ip}] [node message: {node.message}]"
+                    + f" [Error Message: {error}] trying to connect 10 second later!"
                 )
                 await send_logs(log_message)
                 logger.error(log_message)
@@ -110,16 +111,17 @@ async def get_nodes_logs(panel_data: PanelType, node: NodeType) -> None:
                 continue
 
 
-async def handle_cancel(tasks: list[Task], nodes_list: list[NodeType]) -> None:
+async def handle_cancel(panel_data: PanelType, tasks: list[Task]) -> None:
     """
     An asynchronous coroutine that cancels all tasks in the given list.
 
     Args:
+        panel_data (PanelType): The credentials for the panel.
         tasks (list[Task]): The list of tasks to be cancelled.
-        nodes_list (list[NodeType]): The list of nodes to be checked for deactivate nodes.
     """
     deactivate_nodes = set()
     while True:
+        nodes_list = await get_nodes(panel_data)
         for node in nodes_list:
             if node.status != "connected":
                 deactivate_nodes.add(f"Task-{node.node_id}-{node.node_name}")
@@ -132,7 +134,9 @@ async def handle_cancel(tasks: list[Task], nodes_list: list[NodeType]) -> None:
                 deactivate_nodes.remove(task.get_name())
                 task.cancel()
                 tasks.remove(task)
-        await asyncio.sleep(5)
+                if task in task_node_mapping:
+                    task_node_mapping.pop(task)
+        await asyncio.sleep(20)
 
 
 async def handle_cancel_one(tasks: list[Task]) -> None:
@@ -151,31 +155,30 @@ async def handle_cancel_one(tasks: list[Task]) -> None:
             tasks.remove(task)
 
 
-async def check_and_add_new_nodes(
-    panel_data: PanelType, tg: asyncio.TaskGroup, existing_nodes: list[NodeType]
-) -> None:
+async def check_and_add_new_nodes(panel_data: PanelType, tg: asyncio.TaskGroup) -> None:
     """
     An asynchronous coroutine that checks for new nodes and creates tasks for them.
 
     Args:
         panel_data (PanelType): The credentials for the panel.
         tg (asyncio.TaskGroup): The TaskGroup to which the new task will be added.
-        existing_nodes (list[NodeType] | None): The list of existing nodes.
     """
     while True:
         all_nodes = await get_nodes(panel_data)
         if all_nodes and not isinstance(all_nodes, ValueError):
             for node in all_nodes:
-                if node not in existing_nodes and node.status == "connected":
+                if (
+                    node not in task_node_mapping.values()
+                    and node.status == "connected"
+                ):
                     log_message = (
                         f"Add a new node. id: {node.node_id}"
                         + f" name: {node.node_name} ip: {node.node_ip}"
                     )
                     await send_logs(log_message)
                     logger.info(log_message)
-                    existing_nodes.append(node)
                     await create_node_task(panel_data, tg, node)
-        await asyncio.sleep(10)
+        await asyncio.sleep(25)
 
 
 async def create_panel_task(panel_data: PanelType, tg: asyncio.TaskGroup) -> None:
@@ -204,9 +207,8 @@ async def create_node_task(
     """
     if node.node_ip not in INVALID_IPS:
         INVALID_IPS.append(node.node_ip)
-    TASKS.append(
-        tg.create_task(
-            get_nodes_logs(panel_data, node),
-            name=f"Task-{node.node_id}-{node.node_name}",
-        ),
+    task = tg.create_task(
+        get_nodes_logs(panel_data, node), name=f"Task-{node.node_id}-{node.node_name}"
     )
+    TASKS.append(task)
+    task_node_mapping[task] = node

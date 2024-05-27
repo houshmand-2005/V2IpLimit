@@ -171,12 +171,12 @@ async def main():  # pylint: disable=too-many-statements
             # pylint: disable=duplicate-code
             print("Start 'check_and_add_new_nodes' Task Test: ")
             tg.create_task(
-                check_and_add_new_nodes(panel_data, tg, nodes_list),
+                check_and_add_new_nodes(panel_data, tg),
                 name="add_new_nodes",
             )
             print("Start 'handle_cancel' Task Test: ")
             tg.create_task(
-                handle_cancel(TASKS, nodes_list),
+                handle_cancel(panel_data, TASKS),
                 name="cancel_disable_nodes",
             )
         tg.create_task(

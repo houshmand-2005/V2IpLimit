@@ -26,7 +26,7 @@ from utils.panel_api import (
 from utils.read_config import read_config
 from utils.types import PanelType
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 parser = argparse.ArgumentParser(description="Help message")
 parser.add_argument("--version", action="version", version=VERSION)
@@ -77,15 +77,15 @@ async def main():
             for node in nodes_list:
                 if node.status == "connected":
                     await create_node_task(panel_data, tg, node)
-                    await asyncio.sleep(2)
+                    await asyncio.sleep(4)
         print("Start 'check_and_add_new_nodes' Task Test: ")
         tg.create_task(
-            check_and_add_new_nodes(panel_data, tg, nodes_list),
+            check_and_add_new_nodes(panel_data, tg),
             name="add_new_nodes",
         )
         print("Start 'handle_cancel' Task Test: ")
         tg.create_task(
-            handle_cancel(TASKS, nodes_list),
+            handle_cancel(panel_data, TASKS),
             name="cancel_disable_nodes",
         )
         tg.create_task(
