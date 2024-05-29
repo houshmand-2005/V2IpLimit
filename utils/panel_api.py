@@ -39,7 +39,7 @@ async def get_token(panel_data: PanelType) -> PanelType | ValueError:
     for scheme in ["https", "http"]:
         url = f"{scheme}://{panel_data.panel_domain}/api/admin/token"
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(verify=False) as client:
                 response = await client.post(url, data=payload, timeout=5)
                 response.raise_for_status()
             json_obj = response.json()
@@ -91,7 +91,7 @@ async def all_user(panel_data: PanelType) -> list[UserType] | ValueError:
     for scheme in ["https", "http"]:
         url = f"{scheme}://{panel_data.panel_domain}/api/users"
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(verify=False) as client:
                 response = await client.get(url, headers=headers, timeout=10)
                 response.raise_for_status()
             user_inform = response.json()
@@ -147,7 +147,7 @@ async def enable_all_user(panel_data: PanelType) -> None | ValueError:
             url = f"{scheme}://{panel_data.panel_domain}/api/user/{username.name}"
             status = {"status": "active"}
             try:
-                async with httpx.AsyncClient() as client:
+                async with httpx.AsyncClient(verify=False) as client:
                     response = await client.put(url, json=status, headers=headers)
                     response.raise_for_status()
                 message = f"Enabled user: {username.name}"
@@ -198,7 +198,7 @@ async def enable_selected_users(
             url = f"{scheme}://{panel_data.panel_domain}/api/user/{username}"
             status = {"status": "active"}
             try:
-                async with httpx.AsyncClient() as client:
+                async with httpx.AsyncClient(verify=False) as client:
                     response = await client.put(url, json=status, headers=headers)
                     response.raise_for_status()
                 message = f"Enabled user: {username}"
@@ -247,7 +247,7 @@ async def disable_user(panel_data: PanelType, username: UserType) -> None | Valu
     for scheme in ["https", "http"]:
         url = f"{scheme}://{panel_data.panel_domain}/api/user/{username.name}"
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(verify=False) as client:
                 response = await client.put(url, json=status, headers=headers)
                 response.raise_for_status()
             message = f"Disabled user: {username.name}"
@@ -303,7 +303,7 @@ async def get_nodes(panel_data: PanelType) -> list[NodeType] | ValueError:
     for scheme in ["https", "http"]:
         url = f"{scheme}://{panel_data.panel_domain}/api/nodes"
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(verify=False) as client:
                 response = await client.get(url, headers=headers, timeout=10)
                 response.raise_for_status()
             user_inform = response.json()

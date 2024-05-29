@@ -3,6 +3,7 @@ This module contains functions to get logs from the panel and nodes.
 """
 
 import asyncio
+import ssl
 import sys
 from asyncio import Task
 from ssl import SSLError
@@ -24,7 +25,11 @@ from utils.types import NodeType, PanelType
 
 TASKS = []
 INTERVAL = "0.7"
+
 task_node_mapping = {}
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
 
 
 async def get_panel_logs(panel_data: PanelType) -> None:
@@ -46,7 +51,8 @@ async def get_panel_logs(panel_data: PanelType) -> None:
             try:
                 async with websockets.client.connect(
                     f"{scheme}://{panel_data.panel_domain}/api/core"
-                    + f"/logs?interval={INTERVAL}&token={token}"
+                    + f"/logs?interval={INTERVAL}&token={token}",
+                    ssl=ssl_context if scheme == "wss" else None,
                 ) as ws:
                     log_message = "Establishing connection for the main panel"
                     await send_logs(log_message)
@@ -82,11 +88,14 @@ async def get_nodes_logs(panel_data: PanelType, node: NodeType) -> None:
     if isinstance(get_panel_token, ValueError):
         raise get_panel_token
     token = get_panel_token.panel_token
-    for scheme in ["ws", "wss"]:
+    for scheme in ["wss", "ws"]:
         while True:
             try:
                 url = f"{scheme}://{panel_data.panel_domain}/api/node/{node.node_id}/logs?interval={INTERVAL}&token={token}"  # pylint: disable=line-too-long
-                async with websockets.client.connect(url) as ws:
+                async with websockets.client.connect(
+                    url,
+                    ssl=ssl_context if scheme == "wss" else None,
+                ) as ws:
                     log_message = (
                         "Establishing connection for"
                         + f" node number {node.node_id} name: {node.node_name}"

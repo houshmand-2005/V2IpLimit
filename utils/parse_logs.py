@@ -71,7 +71,7 @@ async def check_ip(ip_address: str) -> None | str:
     if "ipapi.co" in endpoint:
         url += "/country"
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(verify=False) as client:
             resp = await client.get(url, timeout=2)
         info = resp.json()
         country = info.get(key) if key else resp.text
