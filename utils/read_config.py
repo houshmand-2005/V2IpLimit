@@ -14,7 +14,7 @@ LAST_READ_TIME = 0
 
 async def read_config(
     check_required_elements=None,
-):
+) -> dict:
     """
     read and return data from a JSON file.
     """

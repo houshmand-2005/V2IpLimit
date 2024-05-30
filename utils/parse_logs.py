@@ -27,7 +27,10 @@ INVALID_EMAILS = [
     "INFO",
     "request",
 ]
-INVALID_IPS = ["1.1.1.1", "8.8.8.8", "0.0.0.0"]
+INVALID_IPS = {
+    "1.1.1.1",
+    "8.8.8.8",
+}
 VALID_IPS = []
 CACHE = {}
 
@@ -95,8 +98,8 @@ async def is_valid_ip(ip: str) -> bool:
         bool: True if the string is a valid IP address, False otherwise.
     """
     try:
-        ipaddress.ip_address(ip)
-        return True
+        ip_obj = ipaddress.ip_address(ip)
+        return not ip_obj.is_private
     except ValueError:
         return False
 
@@ -117,6 +120,8 @@ async def parse_logs(log: str) -> dict[str, UserType] | dict:  # pylint: disable
         list[UserType]
     """
     data = await read_config()
+    if data.get("INVALID_IPS"):
+        INVALID_IPS.update(data.get("INVALID_IPS"))
     lines = log.splitlines()
     for line in lines:
         if "accepted" not in line:
@@ -133,13 +138,13 @@ async def parse_logs(log: str) -> dict[str, UserType] | dict:  # pylint: disable
         else:
             continue
         is_valid_ip_test = await is_valid_ip(ip)
-        if is_valid_ip_test:
+        if is_valid_ip_test and ip not in INVALID_IPS:
             if data["IP_LOCATION"] != "None":
                 country = await check_ip(ip)
                 if country and country == data["IP_LOCATION"]:
                     VALID_IPS.append(country)
                 elif country and country != data["IP_LOCATION"]:
-                    INVALID_IPS.append(ip)
+                    INVALID_IPS.add(ip)
                     continue
         else:
             continue

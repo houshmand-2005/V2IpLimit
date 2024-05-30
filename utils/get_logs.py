@@ -214,8 +214,7 @@ async def create_node_task(
         tg (asyncio.TaskGroup): The TaskGroup to which the new task will be added.
         node (NodeType): The node for which the new task will be created.
     """
-    if node.node_ip not in INVALID_IPS:
-        INVALID_IPS.append(node.node_ip)
+    INVALID_IPS.add(node.node_ip)
     task = tg.create_task(
         get_nodes_logs(panel_data, node), name=f"Task-{node.node_id}-{node.node_name}"
     )
