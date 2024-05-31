@@ -74,9 +74,6 @@ async def check_users_usage(panel_data: PanelType):
     ACTIVE_USERS.clear()
 
 
-TIME_TO_SLEEP = 20
-
-
 async def run_check_users_usage(panel_data: PanelType) -> None:
     """run check_ip_used() function and then run check_users_usage()"""
     while True:
