@@ -14,6 +14,7 @@ Supports both IPv4 and IPv6 And Marzban-node
 - [Installation](#installation)
 - [Telegram Bot Commands](#telegram-bot-commands)
 - [Common Issues and Solutions](#common-issues-and-solutions)
+- [Build](#build)
 - [Donations](#donations)
 
 ## Installation
@@ -115,6 +116,48 @@ V2IpLimit can be controlled via a Telegram bot. Here are the available commands:
       ```
 
     And also See this issue : [Read More Here](https://github.com/houshmand-2005/V2IpLimit/issues/32)
+
+## Build
+
+V2IpLimit provides pre-built versions for Windows and Linux (both amd64 and arm64) which can be found on the [releases page](https://github.com/houshmand-2005/V2IpLimit/releases).
+
+The Windows_amd64 and Linux_amd64 builds are created using GitHub Actions. You can check the build details on the [actions page](https://github.com/houshmand-2005/V2IpLimit/actions/).
+
+The Linux_arm64 build is created on a local machine due to GitHub's lack of ARM machines and the build method's lack of support for Cross Compiling. However, you can build it on your own machine, or use GitHub Actions to build it on your own.<br>
+If you want to build V2IpLimit yourself, you'll first need to install the build essentials, which includes gcc, g++, and more. You can do this with the following command:
+
+```bash
+sudo apt install build-essential
+```
+
+Next, install the necessary dependencies:<br>
+`pip install -r build_requirements.txt`<br>
+And at the end you build it with [nuitka](https://nuitka.net/)<br>
+
+```bash
+python3 -m nuitka --standalone --onefile --follow-imports --include-plugin-directory=utils --include-package=websockets,logging --python-flag="-OO" v2iplimit.py
+```
+
+### Running Without Building
+
+You can also use this program without building it. Just install the dependencies and run it normally:
+
+```bash
+git clone https://github.com/houshmand-2005/V2IpLimit.git
+cd V2IpLimit
+pip install -r requirements.txt
+python3 v2iplimit.py
+```
+
+then like older version you can use `screen` and `cornjob` to run it in background.<sub>(And also don't forget to add your panel information and bot token and telegram user id to config.json file)</sub><br>
+[run with screen](https://github.com/houshmand-2005/V2IpLimit/blob/old_version/Marzban/README.md#screen)<br>
+[run with cornjob](https://github.com/houshmand-2005/V2IpLimit/blob/old_version/Marzban/README.md#screen)<br>
+
+<sub>
+And a small side note if you want to make any changes to the code and then test it, you can use the `core_test.py` file to test the core functions of the program.(Please note that running this make your panel unstable so make sure you run it on a test panel)
+</sub>
+
+<hr>
 
 ## Donations
 
