@@ -1,0 +1,47 @@
+name: Build and Upload V2IpLimit
+
+on:
+  push:
+    paths:
+      - "v2iplimit.py"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check-out repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            **/requirements*.txt
+
+      - name: Install your Dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Build Executable with Nuitka
+        uses: Nuitka/Nuitka-Action@main
+        with:
+          nuitka-version: main
+          script-name: v2iplimit.py
+          standalone: true
+          onefile: true
+          follow-imports: true
+          include-package: "websockets,logging"
+          python-flag: "-OO"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }}_amd64_build
+          path: |
+            build/*.bin
+            build/*.exe
