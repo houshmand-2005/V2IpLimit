@@ -5,6 +5,7 @@ main file that run other files and functions to run the program.
 
 import argparse
 import asyncio
+import time
 
 from run_telegram import run_telegram_bot
 from telegram_bot.send_message import send_logs
@@ -101,4 +102,4 @@ if __name__ == "__main__":
             asyncio.run(main())
         except Exception as er:  # pylint: disable=broad-except
             logger.error(er)
-            asyncio.sleep(10)
+            time.sleep(10)
