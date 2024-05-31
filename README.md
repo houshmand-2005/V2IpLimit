@@ -117,6 +117,9 @@ V2IpLimit can be controlled via a Telegram bot. Here are the available commands:
 
     And also See this issue : [Read More Here](https://github.com/houshmand-2005/V2IpLimit/issues/32)
 
+If you still have a problem you can open an issue on the [issues page](https://github.com/houshmand-2005/V2IpLimit/issues)<br>
+**And also you can still use the old version of this script** [here](https://github.com/houshmand-2005/V2IpLimit/tree/old_version)
+
 ## Build
 
 V2IpLimit provides pre-built versions for Windows and Linux (both amd64 and arm64) which can be found on the [releases page](https://github.com/houshmand-2005/V2IpLimit/releases).
