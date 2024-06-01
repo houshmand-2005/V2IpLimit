@@ -55,12 +55,13 @@ async def check_users_usage(panel_data: PanelType):
     except_users = config_data.get("EXCEPT_USERS", [])
     special_limit = config_data.get("SPECIAL_LIMIT", {})
     limit_number = config_data["GENERAL_LIMIT"]
-    for user_name, data in all_users_log.items():
+    for user_name, user_ip in all_users_log.items():
         if user_name not in except_users:
             user_limit_number = int(special_limit.get(user_name, limit_number))
-            if len(data) > user_limit_number:
+            if len(set(user_ip)) > user_limit_number:
                 message = (
-                    f"User {user_name} has {str(len(data))} active ips. {str(data)}"
+                    f"User {user_name} has {str(len(set(user_ip)))}"
+                    + f" active ips. {str(set(user_ip))}"
                 )
                 logger.warning(message)
                 await send_logs(str("<b>Warning: </b>" + message))
