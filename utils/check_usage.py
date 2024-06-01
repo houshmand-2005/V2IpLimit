@@ -7,6 +7,7 @@ import asyncio
 from collections import Counter
 
 from telegram_bot.send_message import send_logs
+
 from utils.logs import logger
 from utils.panel_api import disable_user
 from utils.read_config import read_config
@@ -15,18 +16,11 @@ from utils.types import PanelType, UserType
 ACTIVE_USERS: dict[str, UserType] | dict = {}
 
 
-async def check_ip_used() -> None:
+async def check_ip_used() -> dict:
     """
     This function checks if a user (name and IP address)
     appears more than two times in the ACTIVE_USERS list.
     """
-    all_users_log = {
-        email: [
-            ip for ip in ACTIVE_USERS[email].ip if ACTIVE_USERS[email].ip.count(ip) > 2
-        ]
-        for email in ACTIVE_USERS.keys()  # pylint: disable=consider-iterating-dictionary,consider-using-dict-items
-    }
-
     all_users_log = {}
     for email in list(ACTIVE_USERS.keys()):
         data = ACTIVE_USERS[email]
@@ -49,6 +43,7 @@ async def check_ip_used() -> None:
     ]
     for message in shorter_messages:
         await send_logs(message)
+    return all_users_log
 
 
 async def check_users_usage(panel_data: PanelType):
@@ -56,28 +51,30 @@ async def check_users_usage(panel_data: PanelType):
     checks the usage of active users
     """
     config_data = await read_config()
+    all_users_log = await check_ip_used()
     except_users = config_data.get("EXCEPT_USERS", [])
     special_limit = config_data.get("SPECIAL_LIMIT", {})
     limit_number = config_data["GENERAL_LIMIT"]
-
-    for user_name, data in ACTIVE_USERS.items():
+    for user_name, data in all_users_log.items():
         if user_name not in except_users:
             user_limit_number = int(special_limit.get(user_name, limit_number))
-            if len(data.ip) > user_limit_number:
-                message = f"User {user_name} has {str(len(data.ip))} active ips. {str(data.ip)}"
+            if len(data) > user_limit_number:
+                message = (
+                    f"User {user_name} has {str(len(data))} active ips. {str(data)}"
+                )
                 logger.warning(message)
                 await send_logs(str("<b>Warning: </b>" + message))
                 try:
-                    await disable_user(panel_data, data)
+                    await disable_user(panel_data, UserType(name=user_name, ip=[]))
                 except ValueError as error:
                     print(error)
     ACTIVE_USERS.clear()
+    all_users_log.clear()
 
 
 async def run_check_users_usage(panel_data: PanelType) -> None:
     """run check_ip_used() function and then run check_users_usage()"""
     while True:
-        await check_ip_used()
         await check_users_usage(panel_data)
         data = await read_config()
         await asyncio.sleep(int(data["CHECK_INTERVAL"]))
