@@ -27,7 +27,7 @@ from utils.panel_api import (
 from utils.read_config import read_config
 from utils.types import PanelType
 
-VERSION = "1.0.4"
+VERSION = "1.0.4.1"
 
 parser = argparse.ArgumentParser(description="Help message")
 parser.add_argument("--version", action="version", version=VERSION)
