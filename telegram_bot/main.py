@@ -264,8 +264,9 @@ async def create_config(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_html(
         text="So now give me your <b>panel address!</b>\n"
         + "Send The Domain or Ip with Port\n"
-        + "like: <code>sub.domain.com:8333</code> Or <code>95.12.153.87:443</code> \n"
-        + "<b>without</b> <code>https://</code> or <code>http://</code> or anything else",
+        + "like: <code>https://sub.domain.com:port</code> Or <code>http://ip:port</code> \n"
+        + "like: <code>https://sub.domain.com:8333</code> Or <code>http://95.12.153.87:443</code> \n"
+        + "If you have SSL, use HTTPS; otherwise, use HTTP.",
     )
     return GET_DOMAIN
 
@@ -278,8 +279,9 @@ async def get_confirmation(update: Update, _context: ContextTypes.DEFAULT_TYPE) 
         await update.message.reply_html(
             text="So now give me your <b>panel address!</b>\n"
             + "Send The Domain or Ip with Port\n"
-            + "like: <code>sub.domain.com:8333</code> Or <code>95.12.153.87:443</code> \n"
-            + "<b>without</b> <code>https://</code> or <code>http://</code> or anything else",
+            + "like: <code>https://sub.domain.com:port</code> Or <code>http://ip:port</code> \n"
+            + "like: <code>https://sub.domain.com:8333</code> Or <code>http://95.12.153.87:443</code> \n"
+            + "If you have SSL, use HTTPS; otherwise, use HTTP.",
         )
         return GET_DOMAIN
     await update.message.reply_html(
