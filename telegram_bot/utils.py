@@ -18,30 +18,28 @@ except ImportError:
 
 async def get_token(panel_data: PanelType) -> PanelType | ValueError:
     """
-    Duplicate function to handel 'circular import' error
+    Duplicate function to handle 'circular import' error
     """
     # pylint: disable=duplicate-code
-    payload = {
+     payload = {
         "username": f"{panel_data.panel_username}",
-        "password": f"{panel_data.panel_password}",
-    }
-    for scheme in ["https", "http"]:
-        url = f"{scheme}://{panel_data.panel_domain}/api/admin/token"
-        try:
-            async with httpx.AsyncClient(verify=False) as client:
-                response = await client.post(url, data=payload, timeout=5)
-                response.raise_for_status()
-            json_obj = response.json()
-            panel_data.panel_token = json_obj["access_token"]
-            return panel_data
-        except Exception:  # pylint: disable=broad-except
-            continue
-    message = (
-        "Failed to get token. make sure the panel is running "
-        + "and the username and password are correct."
-    )
-    raise ValueError(message)
-
+        "password": f"{panel_data.panel_password}"
+     }
+    url = f"{panel_data.panel_domain}/api/admin/token"
+    try:
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.post(url, data=payload, timeout=5)
+            response.raise_for_status()
+        json_obj = response.json()
+        panel_data.panel_token = json_obj["access_token"]
+        return panel_data
+    except Exception as e:  # pylint: disable=broad-except
+        message = (
+            "Failed to get token. Make sure the panel is running "
+            + "and the username and password are correct. "
+            + f"Error: {str(e)}"
+        )
+        raise ValueError(message)
 
 async def read_json_file() -> dict:
     """
