@@ -388,6 +388,8 @@ async def show_special_limit_function(
     if out_put:
         for user in out_put:
             await update.message.reply_html(text=user)
+    else:
+        await update.message.reply_html(text="No special limit found!")
 
 
 async def set_country_code(update: Update, _context: ContextTypes.DEFAULT_TYPE):

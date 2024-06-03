@@ -36,29 +36,31 @@ async def get_token(panel_data: PanelType) -> PanelType | ValueError:
         "username": f"{panel_data.panel_username}",
         "password": f"{panel_data.panel_password}",
     }
-    for scheme in ["https", "http"]:
-        url = f"{scheme}://{panel_data.panel_domain}/api/admin/token"
-        try:
-            async with httpx.AsyncClient(verify=False) as client:
-                response = await client.post(url, data=payload, timeout=5)
-                response.raise_for_status()
-            json_obj = response.json()
-            panel_data.panel_token = json_obj["access_token"]
-            return panel_data
-        except httpx.HTTPStatusError:
-            message = f"[{response.status_code}] {response.text}"
-            await send_logs(message)
-            logger.error(message)
-            continue
-        except SSLError:
-            continue
-        except Exception as error:  # pylint: disable=broad-except
-            message = f"An unexpected error occurred: {error}"
-            await send_logs(message)
-            logger.error(message)
-            continue
+    for attempt in range(10):
+        for scheme in ["https", "http"]:
+            url = f"{scheme}://{panel_data.panel_domain}/api/admin/token"
+            try:
+                async with httpx.AsyncClient(verify=False) as client:
+                    response = await client.post(url, data=payload, timeout=5)
+                    response.raise_for_status()
+                json_obj = response.json()
+                panel_data.panel_token = json_obj["access_token"]
+                return panel_data
+            except httpx.HTTPStatusError:
+                message = f"[{response.status_code}] {response.text}"
+                await send_logs(message)
+                logger.error(message)
+                continue
+            except SSLError:
+                continue
+            except Exception as error:  # pylint: disable=broad-except
+                message = f"An unexpected error occurred: {error}"
+                await send_logs(message)
+                logger.error(message)
+                continue
+        await asyncio.sleep(5 * attempt)
     message = (
-        "Failed to get token. make sure the panel is running "
+        "Failed to get token after 10 attempts. Make sure the panel is running "
         + "and the username and password are correct."
     )
     await send_logs(message)
