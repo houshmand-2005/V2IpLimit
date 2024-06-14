@@ -143,7 +143,7 @@ async def parse_logs(log: str) -> dict[str, UserType] | dict:  # pylint: disable
                 if data["IP_LOCATION"] != "None":
                     country = await check_ip(ip)
                     if country and country == data["IP_LOCATION"]:
-                        VALID_IPS.append(country)
+                        VALID_IPS.append(ip)
                     elif country and country != data["IP_LOCATION"]:
                         INVALID_IPS.add(ip)
                         continue
