@@ -42,12 +42,12 @@ async def get_panel_logs(panel_data: PanelType) -> None:
     Raises:
         ValueError: If there is an issue with getting the panel token.
     """
-    get_panel_token = await get_token(panel_data)
-    if isinstance(get_panel_token, ValueError):
-        raise get_panel_token
-    token = get_panel_token.panel_token
     for scheme in ["wss", "ws"]:
         while True:
+            get_panel_token = await get_token(panel_data)
+            if isinstance(get_panel_token, ValueError):
+                raise get_panel_token
+            token = get_panel_token.panel_token
             try:
                 async with websockets.client.connect(
                     f"{scheme}://{panel_data.panel_domain}/api/core"
@@ -84,12 +84,12 @@ async def get_nodes_logs(panel_data: PanelType, node: NodeType) -> None:
     Raises:
         ValueError: If there is an issue with getting the panel token.
     """
-    get_panel_token = await get_token(panel_data)
-    if isinstance(get_panel_token, ValueError):
-        raise get_panel_token
-    token = get_panel_token.panel_token
     for scheme in ["wss", "ws"]:
         while True:
+            get_panel_token = await get_token(panel_data)
+            if isinstance(get_panel_token, ValueError):
+                raise get_panel_token
+            token = get_panel_token.panel_token
             try:
                 url = f"{scheme}://{panel_data.panel_domain}/api/node/{node.node_id}/logs?interval={INTERVAL}&token={token}"  # pylint: disable=line-too-long
                 async with websockets.client.connect(
