@@ -137,17 +137,18 @@ async def parse_logs(log: str) -> dict[str, UserType] | dict:  # pylint: disable
             ip = ip_v4_match.group(1)
         else:
             continue
-        is_valid_ip_test = await is_valid_ip(ip)
-        if is_valid_ip_test and ip not in INVALID_IPS:
-            if data["IP_LOCATION"] != "None":
-                country = await check_ip(ip)
-                if country and country == data["IP_LOCATION"]:
-                    VALID_IPS.append(country)
-                elif country and country != data["IP_LOCATION"]:
-                    INVALID_IPS.add(ip)
-                    continue
-        else:
-            continue
+        if ip not in VALID_IPS:
+            is_valid_ip_test = await is_valid_ip(ip)
+            if is_valid_ip_test and ip not in INVALID_IPS:
+                if data["IP_LOCATION"] != "None":
+                    country = await check_ip(ip)
+                    if country and country == data["IP_LOCATION"]:
+                        VALID_IPS.append(country)
+                    elif country and country != data["IP_LOCATION"]:
+                        INVALID_IPS.add(ip)
+                        continue
+            else:
+                continue
         if email_match:
             email = email_match.group(1)
             email = await remove_id_from_username(email)
