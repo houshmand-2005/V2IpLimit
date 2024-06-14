@@ -2,7 +2,7 @@
 
 # V2IpLimit
 
-<b>Limiting the number of active users with IP</b><sub> (with xray logs)</sub><br>
+<b>Limiting the number of active users with IP for [Marzban](https://github.com/Gozargah/Marzban)</b><sub> (with xray logs)</sub><br>
 Supports both IPv4 and IPv6 And Marzban-node
 
 </center>
