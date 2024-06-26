@@ -6,6 +6,12 @@ if ! command -v screen &>/dev/null; then
     exit 1
 fi
 
+if ! command -v jq &>/dev/null; then
+    echo "The 'jq' command is not installed."
+    echo "You can install it with 'sudo apt install jq' on Ubuntu/Debian, or 'sudo yum install jq' on CentOS/RHEL."
+    exit 1
+fi
+
 download_program() {
     local architecture=$(uname -m)
     local url
