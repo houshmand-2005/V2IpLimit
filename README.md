@@ -4,6 +4,7 @@
 
 <b>Limiting the number of active users with IP for [Marzban](https://github.com/Gozargah/Marzban)</b><sub> (with xray logs)</sub><br>
 Supports both IPv4 and IPv6 And Marzban-node
+<sub>(Tested on Ubuntu 22.04 & 24.04, Fedora 39 & 40)</sub>
 
 </center>
 
