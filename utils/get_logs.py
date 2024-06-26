@@ -157,7 +157,6 @@ async def handle_cancel_one(tasks: list[Task]) -> None:
         tasks (list[Task]): The list of tasks to be cancelled.
     """
     for task in tasks:
-        print(task)
         if task.get_name() == "Task-panel":
             print(f"Cancelling {task.get_name()}...")
             task.cancel()
