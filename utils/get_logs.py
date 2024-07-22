@@ -173,6 +173,7 @@ async def handle_cancel_all(tasks: list[Task], panel_data: PanelType) -> None:
     Args:
         tasks (list[Task]): The list of tasks to be cancelled.
     """
+    # pylint: disable=duplicate-code
     while True:
         await asyncio.sleep(8192)  # =~ 2 hours and 27 minutes
         for task in tasks:
