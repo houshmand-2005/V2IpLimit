@@ -16,6 +16,7 @@ from utils.get_logs import (
     create_node_task,
     create_panel_task,
     handle_cancel,
+    handle_cancel_all,
 )
 from utils.handel_dis_users import DisabledUsers
 from utils.logs import logger
@@ -88,6 +89,10 @@ async def main():
         tg.create_task(
             handle_cancel(panel_data, TASKS),
             name="cancel_disable_nodes",
+        )
+        tg.create_task(
+            handle_cancel_all(TASKS, panel_data),
+            name="cancel_all",
         )
         tg.create_task(
             enable_dis_user(panel_data),
