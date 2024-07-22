@@ -3,6 +3,7 @@ This module contains functions to get logs from the panel and nodes.
 """
 
 import asyncio
+import random
 import ssl
 import sys
 from asyncio import Task
@@ -24,7 +25,6 @@ from utils.parse_logs import parse_logs
 from utils.types import NodeType, PanelType
 
 TASKS = []
-INTERVAL = "0.7"
 
 task_node_mapping = {}
 ssl_context = ssl.create_default_context()
@@ -44,6 +44,7 @@ async def get_panel_logs(panel_data: PanelType) -> None:
     """
     for scheme in ["wss", "ws"]:
         while True:
+            interval = random.choice(("0.9", "1.3", "1.5", "1.7"))
             get_panel_token = await get_token(panel_data)
             if isinstance(get_panel_token, ValueError):
                 raise get_panel_token
@@ -51,7 +52,7 @@ async def get_panel_logs(panel_data: PanelType) -> None:
             try:
                 async with websockets.client.connect(
                     f"{scheme}://{panel_data.panel_domain}/api/core"
-                    + f"/logs?interval={INTERVAL}&token={token}",
+                    + f"/logs?interval={interval}&token={token}",
                     ssl=ssl_context if scheme == "wss" else None,
                 ) as ws:
                     log_message = "Establishing connection for the main panel"
@@ -86,12 +87,13 @@ async def get_nodes_logs(panel_data: PanelType, node: NodeType) -> None:
     """
     for scheme in ["wss", "ws"]:
         while True:
+            interval = random.choice(("0.9", "1.3", "1.5", "1.7"))
             get_panel_token = await get_token(panel_data)
             if isinstance(get_panel_token, ValueError):
                 raise get_panel_token
             token = get_panel_token.panel_token
             try:
-                url = f"{scheme}://{panel_data.panel_domain}/api/node/{node.node_id}/logs?interval={INTERVAL}&token={token}"  # pylint: disable=line-too-long
+                url = f"{scheme}://{panel_data.panel_domain}/api/node/{node.node_id}/logs?interval={interval}&token={token}"  # pylint: disable=line-too-long
                 async with websockets.client.connect(
                     url,
                     ssl=ssl_context if scheme == "wss" else None,
