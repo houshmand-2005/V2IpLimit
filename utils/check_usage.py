@@ -7,7 +7,6 @@ import asyncio
 from collections import Counter
 
 from telegram_bot.send_message import send_logs
-
 from utils.logs import logger
 from utils.panel_api import disable_user
 from utils.read_config import read_config
@@ -29,6 +28,13 @@ async def check_ip_used() -> dict:
         all_users_log[email] = data.ip
         logger.info(data)
     total_ips = sum(len(ips) for ips in all_users_log.values())
+    all_users_log = dict(
+        sorted(
+            all_users_log.items(),
+            key=lambda x: len(x[1]),
+            reverse=True,
+        )
+    )
     messages = [
         f"<code>{email}</code> with <code>{len(ips)}</code> active ip  \n- "
         + "\n- ".join(ips)
