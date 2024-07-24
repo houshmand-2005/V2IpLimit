@@ -174,24 +174,23 @@ async def handle_cancel_all(tasks: list[Task], panel_data: PanelType) -> None:
         tasks (list[Task]): The list of tasks to be cancelled.
     """
     # pylint: disable=duplicate-code
-    while True:
-        await asyncio.sleep(8192)  # =~ 2 hours and 27 minutes
-        for task in tasks:
-            print(f"Cancelling {task.get_name()}...")
-            task.cancel()
-            tasks.remove(task)
-        await get_nodes(panel_data)
-        async with asyncio.TaskGroup() as tg:
+    async with asyncio.TaskGroup() as tg:
+        while True:
+            await asyncio.sleep(8192)  # =~ 2 hours and 27 minutes
+            for task in tasks:
+                print(f"Cancelling {task.get_name()}...")
+                task.cancel()
+                tasks.remove(task)
             print("Start Create Panel Task Test: ")
             await create_panel_task(panel_data, tg)
-            await asyncio.sleep(2)
+            await asyncio.sleep(5)
             nodes_list = await get_nodes(panel_data)
             if nodes_list and not isinstance(nodes_list, ValueError):
                 print("Start Create Nodes Task Test: ")
                 for node in nodes_list:
                     if node.status == "connected":
                         await create_node_task(panel_data, tg, node)
-                        await asyncio.sleep(2)
+                        await asyncio.sleep(3)
 
 
 async def check_and_add_new_nodes(panel_data: PanelType, tg: asyncio.TaskGroup) -> None:
