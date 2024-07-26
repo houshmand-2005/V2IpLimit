@@ -6,6 +6,12 @@ if ! command -v screen &>/dev/null; then
     exit 1
 fi
 
+if ! command -v wget &>/dev/null; then
+    echo "The 'wget' command is not installed."
+    echo "You can install it with 'sudo apt install wget' on Ubuntu/Debian, or 'sudo yum install wget' on CentOS/RHEL."
+    exit 1
+fi
+
 if ! command -v jq &>/dev/null; then
     echo "The 'jq' command is not installed."
     echo "You can install it with 'sudo apt install jq' on Ubuntu/Debian, or 'sudo yum install jq' on CentOS/RHEL."
@@ -163,29 +169,37 @@ create_or_update_admins() {
 
     echo "The ADMIN has been updated."
 }
+if [ $# -eq 0 ]; then
+    while true; do
+        echo "-----------------------------"
+        echo "1. Start the script"
+        echo "2. Stop the script"
+        echo "3. Attach to the script"
+        echo "4. Update the script"
+        echo "5. Create or Update telegram BOT_TOKEN"
+        echo "6. Create or Update ADMINS"
+        echo "7. Exit"
+        echo "-----------------------------"
+        read -p "Enter your choice: " choice
 
-while true; do
-    echo "-----------------------------"
-    echo "1. Start the script"
-    echo "2. Stop the script"
-    echo "3. Attach to the script"
-    echo "4. Update the script"
-    echo "5. Create or Update telegram BOT_TOKEN"
-    echo "6. Create or Update ADMINS"
-    echo "7. Exit"
-    echo "-----------------------------"
-    read -p "Enter your choice: " choice
+        case $choice in
+        1) start_program ;;
+        2) stop_program ;;
+        3) attach_program ;;
+        4) update_program ;;
+        5) create_or_update_token ;;
+        6) create_or_update_admins ;;
+        7) break ;;
+        *) echo "Invalid choice. Please enter 1, 2, 3,... or 7." ;;
+        esac
 
-    case $choice in
-    1) start_program ;;
-    2) stop_program ;;
-    3) attach_program ;;
-    4) update_program ;;
-    5) create_or_update_token ;;
-    6) create_or_update_admins ;;
-    7) break ;;
-    *) echo "Invalid choice. Please enter 1, 2, 3,... or 7." ;;
+        echo ""
+    done
+else
+    case $1 in
+    start) start_program ;;
+    stop) stop_program ;;
+    update) update_program ;;
+    *) echo "{start|stop|update}" ;;
     esac
-
-    echo ""
-done
+fi
