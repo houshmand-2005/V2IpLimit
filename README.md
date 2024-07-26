@@ -15,6 +15,7 @@ Supports both IPv4 and IPv6 And Marzban-node
 - [Installation](#installation)
 - [Telegram Bot Commands](#telegram-bot-commands)
 - [Common Issues and Solutions](#common-issues-and-solutions)
+- [Using Cron Jobs](#using-cron-jobs)
 - [Build](#build)
 - [Donations](#donations)
 
@@ -74,7 +75,7 @@ V2IpLimit can be controlled via a Telegram bot. Here are the available commands:
 1.  **Incorrect Count of Connected IPs**
 
     - Why does the number of detected IPs decrease after a while?
-    - This problem arises when the WebSocket connection becomes corrupted during log transmission. So you can use CronJob(for now it isn't available) method
+    - This problem arises when the WebSocket connection becomes corrupted during log transmission. How ever in the new version of this script this problem mostly solved. But if you still have this problem you can use [CronJob](#using-cron-jobs) method
 
 2.  **Uninstalling V2IpLimit Script**
 
@@ -120,6 +121,37 @@ V2IpLimit can be controlled via a Telegram bot. Here are the available commands:
 
 If you still have a problem you can open an issue on the [issues page](https://github.com/houshmand-2005/V2IpLimit/issues)<br>
 **And also you can still use the old version of this script** [here](https://github.com/houshmand-2005/V2IpLimit/tree/old_version)
+
+## Using Cron Jobs
+
+To ensure that _V2IpLimit_ runs regularly or automatically after a reboot, you can set up a cron job.  
+_Note:_ cronjob is **not recommended** for normal work, but if you need just make sure you put Telegram `BOT_TOKEN` and `ADMINS` in the `config.json` file. And also you can still check logs with
+
+```bash
+bash <(curl -sSL https://houshmand-2005.github.io/v2iplimit.sh)
+```
+
+and then choose `3. Attach to the script`<br>
+
+Here's how you can do it. Open your crontab file for editing:
+
+```bash
+crontab -e
+```
+
+Add a new line to schedule script. For example:
+
+```bash
+0 */6 * * * bash <(curl -sSL https://houshmand-2005.github.io/v2iplimit.sh) stop && bash <(curl -sSL https://houshmand-2005.github.io/v2iplimit.sh) start
+```
+
+Or run at system reboot:
+
+```bash
+@reboot bash <(curl -sSL https://houshmand-2005.github.io/v2iplimit.sh) start
+```
+
+You can learn more about cron job scheduling by checking the [Cron Howto](https://help.ubuntu.com/community/CronHowto) guide.
 
 ## Build
 
