@@ -1,2 +1,2 @@
-websockets==12.0
+websockets==13.0
 python-telegram-bot==21.4
