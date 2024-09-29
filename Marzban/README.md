@@ -52,7 +52,7 @@ pip install pytz
 Then clone the project
 
 ```bash
-git clone https://github.com/houshmand-2005/V2IpLimit.git
+git clone -b old_version https://github.com/houshmand-2005/V2IpLimit.git
 cd V2IpLimit
 cd Marzban
 ```
