@@ -26,6 +26,35 @@ from utils.types import NodeType, PanelType
 
 TASKS = []
 
+import os
+import re
+from datetime import datetime, timedelta
+
+# مسیر فایل ذخیره لاگ فیلتر شده
+LOG_FILE_PATH = "/root/V2IpLimit/connections_log.txt"
+
+def save_filtered_log(log_data):
+    """ذخیره لاگ‌های دارای email همراه با زمان دقیق تهران."""
+    try:
+        # جستجوی خطوطی که حاوی email هستند
+        match = re.search(r"accepted tcp:([\w\.-]+):\d+.*email: ([\w\.]+)", log_data)
+        if match:
+            destination, email = match.groups()
+
+            # دریافت ساعت تهران (UTC+3:30)
+            tehran_time = datetime.utcnow() + timedelta(hours=3, minutes=30)
+            formatted_time = tehran_time.strftime("%Y-%m-%d %H:%M:%S")
+
+            # ذخیره در فایل لاگ با زمان تهران
+            log_entry = f"{formatted_time} - {email} connected to {destination}\n"
+
+            with open(LOG_FILE_PATH, "a", encoding="utf-8") as f:
+                f.write(log_entry)
+    except Exception as e:
+        print(f"⚠️ Error saving filtered log: {e}")
+
+
+
 task_node_mapping = {}
 ssl_context = ssl.create_default_context()
 ssl_context.check_hostname = False
@@ -33,15 +62,6 @@ ssl_context.verify_mode = ssl.CERT_NONE
 
 
 async def get_panel_logs(panel_data: PanelType) -> None:
-    """
-    This function establishes a websocket connection to the main server and retrieves logs.
-
-    Args:
-        panel_data (PanelType): The credentials for the panel.
-
-    Raises:
-        ValueError: If there is an issue with getting the panel token.
-    """
     for scheme in ["wss", "ws"]:
         while True:
             interval = random.choice(("0.9", "1.3", "1.5", "1.7"))
@@ -54,37 +74,31 @@ async def get_panel_logs(panel_data: PanelType) -> None:
                     f"{scheme}://{panel_data.panel_domain}/api/core"
                     + f"/logs?interval={interval}&token={token}",
                     ssl=ssl_context if scheme == "wss" else None,
+                    ping_interval=20,    # ← اضافه شد
+                    ping_timeout=20,     # ← اضافه شد
                 ) as ws:
+
                     log_message = "Establishing connection for the main panel"
                     await send_logs(log_message)
                     logger.info(log_message)
                     while True:
                         new_log = await ws.recv()
                         await parse_logs(str(new_log))
+                        save_filtered_log(new_log)  # ذخیره فقط لاگ‌های دارای email
+
 
             except SSLError:
                 break
-            except Exception as error:  # pylint: disable=broad-except
-                log_message = (
-                    f"[Main panel] Failed to connect {error} trying 20 second later!"
-                )
+            except Exception as error:
+                log_message = f"[Main panel] Failed to connect {error} trying 20 second later!"
                 await send_logs(log_message)
                 logger.error(log_message)
                 await asyncio.sleep(20)
                 continue
 
 
+
 async def get_nodes_logs(panel_data: PanelType, node: NodeType) -> None:
-    """
-    This function establishes a websocket connection to a specific node and retrieves logs.
-
-    Args:
-        panel_data (PanelType): The credentials for the panel.
-        node (NodeType): The specific node to connect to.
-
-    Raises:
-        ValueError: If there is an issue with getting the panel token.
-    """
     for scheme in ["wss", "ws"]:
         while True:
             interval = random.choice(("0.9", "1.3", "1.5", "1.7"))
@@ -93,23 +107,30 @@ async def get_nodes_logs(panel_data: PanelType, node: NodeType) -> None:
                 raise get_panel_token
             token = get_panel_token.panel_token
             try:
-                url = f"{scheme}://{panel_data.panel_domain}/api/node/{node.node_id}/logs?interval={interval}&token={token}"  # pylint: disable=line-too-long
+                url = f"{scheme}://{panel_data.panel_domain}/api/node/{node.node_id}/logs?interval={interval}&token={token}"
                 async with websockets.client.connect(
                     url,
                     ssl=ssl_context if scheme == "wss" else None,
+                    ping_interval=20,    # ← اضافه شد
+                    ping_timeout=20,     # ← اضافه شد
+                    
                 ) as ws:
+
                     log_message = (
-                        "Establishing connection for"
-                        + f" node number {node.node_id} name: {node.node_name}"
+                        f"Establishing connection for node number {node.node_id} name: {node.node_name}"
                     )
                     await send_logs(log_message)
                     logger.info(log_message)
                     while True:
                         new_log = await ws.recv()
                         await parse_logs(str(new_log))
+                        save_filtered_log(new_log)  # ذخیره فقط لاگ‌های دارای email
+
+
+
             except SSLError:
                 break
-            except Exception as error:  # pylint: disable=broad-except
+            except Exception as error:
                 log_message = (
                     f"Failed to connect to this node [node id: {node.node_id}]"
                     + f" [node name: {node.node_name}]"
@@ -120,6 +141,7 @@ async def get_nodes_logs(panel_data: PanelType, node: NodeType) -> None:
                 logger.error(log_message)
                 await asyncio.sleep(10)
                 continue
+
 
 
 async def handle_cancel(panel_data: PanelType, tasks: list[Task]) -> None:

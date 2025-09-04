@@ -371,6 +371,7 @@ async def get_nodes(panel_data: PanelType) -> list[NodeType] | ValueError:
     raise ValueError(message)
 
 
+
 async def enable_dis_user(panel_data: PanelType):
     """
     Enable disabled users every 'TIME_TO_ACTIVE_USERS' seconds.
@@ -378,6 +379,7 @@ async def enable_dis_user(panel_data: PanelType):
     dis_obj = DisabledUsers()
     while True:
         data = await read_config()
+        print(f"[DEBUG] Going to sleep for {data['TIME_TO_ACTIVE_USERS']} seconds")
         await asyncio.sleep(int(data["TIME_TO_ACTIVE_USERS"]))
         if DISABLED_USERS:
             await enable_selected_users(panel_data, DISABLED_USERS)
