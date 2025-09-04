@@ -21,11 +21,7 @@
 0 * * * * /usr/bin/python3 /root/V2IpLimit/sendlog.py
 @reboot /root/V2IpLimit/start_log_server.sh
 #0 */5 * * * /root/V2IpLimit/restart_v2iplimit.sh
-45 17 * * * "/root/.acme.sh"/acme.sh --cron --home "/root/.acme.sh" > /dev/null
 
-*/5 * * * * /bin/bash /root/ac-backup-m.sh >/dev/null 2>&1
-0 */1 * * * /usr/bin/bash -c 'marzban backup' # marzban-backup-service
-*/5 * * * * /root/_Master_backuper_script.sh
 
 ```
 **بعد از تنظیم تمام فایل ها ( حتی فایل کانفیگ) و کرون جاب های بالا برنامه را میتوانید به صورت زیر نیز اجرا کنید** 
