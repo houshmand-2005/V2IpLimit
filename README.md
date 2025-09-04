@@ -15,14 +15,12 @@
 برای اجرا حتما کرون جاب خود را به صورت زیر تنظیم کنید 
 ```bash
 */5 * * * * /root/V2IpLimit/restart_checkusers.sh >> /var/log/checkusers_cron.log 2>&1
-
 */5 * * * * /root/V2IpLimit/restart_checkusers.sh
 @reboot /root/V2IpLimit/restart_checkusers.sh
 0 * * * * /usr/bin/python3 /root/V2IpLimit/sendlog.py
 @reboot /root/V2IpLimit/start_log_server.sh
+@reboot /root/V2IpLimit/restart_v2iplimit.sh
 #0 */5 * * * /root/V2IpLimit/restart_v2iplimit.sh
-
-
 ```
 **بعد از تنظیم تمام فایل ها ( حتی فایل کانفیگ) و کرون جاب های بالا برنامه را میتوانید به صورت زیر نیز اجرا کنید** 
 ```bash
