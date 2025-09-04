@@ -11,7 +11,24 @@
 - رفع مشل عدم ارسال کامل لاگ در ربات تلگرام
 - رفع باگ
 
+برای اجرا حتما کرون جاب خود را به صورت زیر تنظیم کنید 
+```bash
+*/5 * * * * /root/V2IpLimit/restart_checkusers.sh >> /var/log/checkusers_cron.log 2>&1
 
+*/5 * * * * /root/V2IpLimit/restart_checkusers.sh
+@reboot /root/V2IpLimit/restart_checkusers.sh
+0 * * * * /usr/bin/python3 /root/V2IpLimit/sendlog.py
+@reboot /root/V2IpLimit/start_log_server.sh
+#0 */5 * * * /root/V2IpLimit/restart_v2iplimit.sh
+45 17 * * * "/root/.acme.sh"/acme.sh --cron --home "/root/.acme.sh" > /dev/null
+
+*/5 * * * * /bin/bash /root/ac-backup-m.sh >/dev/null 2>&1
+0 */1 * * * /usr/bin/bash -c 'marzban backup' # marzban-backup-service
+*/5 * * * * /root/_Master_backuper_script.sh
+
+```
+
+# در فایل sen_log.py حتما  توکن ربات و چت آیدی ادمینی که میخواهید لاگ های info ارسال شود را تنظیم کنید 
 
 # V2IpLimit
 
