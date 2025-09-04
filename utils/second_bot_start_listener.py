@@ -3,8 +3,8 @@ import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-BOT_TOKEN = "8487799956:AAFxr0D_i7Q8CKNzCj_WX_b4lri1bp0jTDY"
-ADMIN_ID = 1047662735
+BOT_TOKEN = ""
+ADMIN_ID = 
 SEEN_USERS_FILE = "seen_users.json"
 
 # خواندن لیست آیدی‌های ذخیره‌شده
