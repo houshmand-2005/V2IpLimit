@@ -33,11 +33,12 @@ jobs:
         with:
           nuitka-version: main
           script-name: v2iplimit.py
-          standalone: true
-          onefile: true
-          follow-imports: true
+          mode: app
           include-package: "websockets,logging"
           python-flag: "-OO"
+          assume-yes-for-downloads: true
+          output-dir: build
+          caching-key: nuitka-${{ runner.os }}-${{ runner.arch }}-py-${{ matrix.python-version }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
