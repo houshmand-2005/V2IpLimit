@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "v2iplimit.py"
+  workflow_dispatch:
 
 jobs:
   build:
