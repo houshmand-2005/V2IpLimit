@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: Check-out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.13"
           cache: "pip"
@@ -40,9 +40,9 @@ jobs:
           python-flag: "-OO"
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ runner.os }}_amd64_build
+          name: ${{ runner.os }}_${{ runner.arch }}_build
           path: |
             build/*.bin
             build/*.exe
