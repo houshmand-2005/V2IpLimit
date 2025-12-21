@@ -4,14 +4,68 @@ on:
   push:
     paths:
       - "v2iplimit.py"
+      - "requirements.txt"
+      - "build_requirements.txt"
+      - ".github/workflows/build.yml"
   workflow_dispatch:
 
 jobs:
-  build:
+  build-linux-debian12:
+    name: Build Linux (Debian 12, Python 3.13) - ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: python:3.13-bookworm
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, ubuntu-22.04-arm]
-    runs-on: ${{ matrix.os }}
+        include:
+          - runner: ubuntu-latest
+            arch: amd64
+          - runner: ubuntu-22.04-arm
+            arch: arm64
+
+    steps:
+      - name: Install system deps
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            git ca-certificates \
+            build-essential patchelf
+          rm -rf /var/lib/apt/lists/*
+
+      - name: Check-out repository
+        uses: actions/checkout@v4
+
+      - name: Install Python deps
+        run: |
+          python -m pip install -U pip wheel
+          pip install -r requirements.txt
+          pip install -r build_requirements.txt
+
+      - name: Build Executable with Nuitka
+        run: |
+          python -m nuitka \
+            --standalone --onefile --follow-imports \
+            --include-plugin-directory=utils \
+            --include-package=websockets,logging \
+            --python-flag="-OO" \
+            --output-dir=build \
+            v2iplimit.py
+
+      - name: Show required GLIBC (debug)
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends binutils && rm -rf /var/lib/apt/lists/*
+          strings -a build/**/*.bin | grep -oE 'GLIBC_[0-9]+\.[0-9]+' | sort -Vu | tail -n 30 || true
+
+      - name: Upload Artifacts (Linux)
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux_${{ matrix.arch }}_debian12
+          path: build/**/*.bin
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
 
     steps:
       - name: Check-out repository
@@ -25,25 +79,17 @@ jobs:
           cache-dependency-path: |
             **/requirements*.txt
 
-      - name: Install your Dependencies
+      - name: Install Dependencies
         run: |
           pip install -r requirements.txt
-      - name: Build Executable with Nuitka
-        uses: Nuitka/Nuitka-Action@main
-        with:
-          nuitka-version: main
-          script-name: v2iplimit.py
-          mode: app
-          include-package: "websockets,logging"
-          python-flag: "-OO"
-          assume-yes-for-downloads: true
-          output-dir: build
-          caching-key: nuitka-${{ runner.os }}-${{ runner.arch }}-py-${{ matrix.python-version }}
+          pip install -r build_requirements.txt
 
-      - name: Upload Artifacts
+      - name: Build Executable with Nuitka
+        run: |
+          python -m nuitka --standalone --onefile --follow-imports --include-plugin-directory=utils --include-package=websockets,logging --python-flag="-OO" --output-dir=build v2iplimit.py
+
+      - name: Upload Artifacts (Windows)
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ runner.os }}_${{ runner.arch }}_build
-          path: |
-            build/*.bin
-            build/*.exe
+          name: windows_${{ runner.arch }}_build
+          path: build/**/*.exe
