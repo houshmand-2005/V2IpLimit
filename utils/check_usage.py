@@ -1,9 +1,10 @@
 """
-This module checks if a user (name and IP address)
+This module checks if a user (name and IP address/subnet)
 appears more than two times in the ACTIVE_USERS list.
 """
 
 import asyncio
+import ipaddress
 from collections import Counter
 
 from telegram_bot.send_message import send_logs
@@ -15,16 +16,44 @@ from utils.types import PanelType, UserType
 ACTIVE_USERS: dict[str, UserType] | dict = {}
 
 
+def collapse_ips_to_subnets(ips: list[str]) -> list[str]:
+    """
+    Group IPs by subnet so addresses from the same subnet count as one.
+    Uses /24 for IPv4 (first three octets) and /64 for IPv6.
+    Keeps only subnets that appeared more than twice to match the previous
+    "active IP" threshold.
+    """
+    subnet_counts: Counter[str] = Counter()
+    subnet_order: list[str] = []
+
+    for ip in ips:
+        try:
+            ip_obj = ipaddress.ip_address(ip)
+        except ValueError:
+            subnet = ip
+        else:
+            subnet = (
+                ipaddress.ip_network(f"{ip}/24", strict=False)
+                if ip_obj.version == 4
+                else ipaddress.ip_network(f"{ip}/64", strict=False)
+            )
+            subnet = str(subnet)
+        subnet_counts[subnet] += 1
+        if subnet_counts[subnet] == 1:
+            subnet_order.append(subnet)
+
+    return [subnet for subnet in subnet_order if subnet_counts[subnet] > 2]
+
+
 async def check_ip_used() -> dict:
     """
-    This function checks if a user (name and IP address)
+    This function checks if a user (name and IP address/subnet)
     appears more than two times in the ACTIVE_USERS list.
     """
     all_users_log = {}
     for email in list(ACTIVE_USERS.keys()):
         data = ACTIVE_USERS[email]
-        ip_counts = Counter(data.ip)
-        data.ip = list({ip for ip in data.ip if ip_counts[ip] > 2})
+        data.ip = collapse_ips_to_subnets(data.ip)
         all_users_log[email] = data.ip
         logger.info(data)
     total_ips = sum(len(ips) for ips in all_users_log.values())
