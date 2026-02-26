@@ -11,7 +11,7 @@ def normalize_ip(ip: str) -> str:
     return str(ipaddress.ip_address(ip))
 
 
-def ip_to_subnet(ip: str, ipv4_prefix: int = 24, ipv6_prefix: int = 64) -> str:
+def ip_to_subnet(ip: str, ipv4_prefix: int = 16, ipv6_prefix: int = 64) -> str:
     """Convert IP to subnet CIDR string using configurable prefixes."""
     ip_obj = ipaddress.ip_address(ip)
     prefix = ipv4_prefix if ip_obj.version == 4 else ipv6_prefix
@@ -32,7 +32,7 @@ def should_block_user(unique_subnet_count: int, threshold_subnets: int) -> bool:
 
 
 def build_subnet_map(
-    ips: list[str], ipv4_prefix: int = 24, ipv6_prefix: int = 64
+    ips: list[str], ipv4_prefix: int = 16, ipv6_prefix: int = 64
 ) -> dict[str, list[str]]:
     """Build mapping subnet -> list of unique canonical IPs in that subnet."""
     grouped: dict[str, list[str]] = OrderedDict()

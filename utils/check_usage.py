@@ -27,8 +27,8 @@ def _parse_prefix(value: Any, default: int, min_value: int, max_value: int) -> i
 
 
 def _get_subnet_prefixes(config_data: dict) -> tuple[int, int]:
-    """Read subnet prefixes from config, with defaults IPv4=/24, IPv6=/64."""
-    ipv4_prefix = _parse_prefix(config_data.get("IPV4_SUBNET_PREFIX"), 24, 0, 32)
+    """Read subnet prefixes from config, with defaults IPv4=/16, IPv6=/64."""
+    ipv4_prefix = _parse_prefix(config_data.get("IPV4_SUBNET_PREFIX"), 16, 0, 32)
     ipv6_prefix = _parse_prefix(config_data.get("IPV6_SUBNET_PREFIX"), 64, 0, 128)
     return ipv4_prefix, ipv6_prefix
 

@@ -8,9 +8,9 @@ from utils.subnets import build_subnet_map, ip_to_subnet, normalize_ip, unique_i
 class TestSubnetUtils(unittest.TestCase):
     """Validate IP normalization and subnet grouping behavior."""
 
-    def test_ip_to_subnet_ipv4_default_24(self):
-        """IPv4 addresses are mapped to /24 by default."""
-        self.assertEqual(ip_to_subnet("10.0.1.2"), "10.0.1.0/24")
+    def test_ip_to_subnet_ipv4_default_16(self):
+        """IPv4 addresses are mapped to /16 by default."""
+        self.assertEqual(ip_to_subnet("10.0.1.2"), "10.0.0.0/16")
 
     def test_ip_to_subnet_ipv6_default_64(self):
         """IPv6 addresses are mapped to /64 by default."""
@@ -47,9 +47,8 @@ class TestSubnetUtils(unittest.TestCase):
             "2001:db8:abcd:5678::1",
         ]
         subnet_map = build_subnet_map(ips)
-        self.assertEqual(len(subnet_map), 4)
-        self.assertIn("10.0.1.0/24", subnet_map)
-        self.assertIn("10.0.2.0/24", subnet_map)
+        self.assertEqual(len(subnet_map), 3)
+        self.assertIn("10.0.0.0/16", subnet_map)
         self.assertIn("2001:db8:abcd:1234::/64", subnet_map)
         self.assertIn("2001:db8:abcd:5678::/64", subnet_map)
 
